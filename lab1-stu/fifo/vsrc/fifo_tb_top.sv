@@ -1,7 +1,12 @@
-/* test bench of fifo
+/* fifo_tb_top.sv
+ * test bench of fifo
  * Sunic
  * 2019.11.03
  */
+
+`include "fifo_dut.v"
+`include "fifo_tb_if.sv"
+`include "fifo_tb_funct.sv"
 
 module fifo_tb();
 
@@ -14,13 +19,13 @@ module fifo_tb();
     fifo_test  fifo_tb_top_test(fifo_tb_top_io);
 
     fifo_dut fifo_dut1(.clock    (fifo_tb_top_io.clock),
-                    .reset_n  (fifo_tb_top_io.reset_n),
-                    .valid_in (fifo_tb_top_io.valid_in),
-                    .size     (fifo_tb_top_io.size),
-                    .data_in  (fifo_tb_top_io.data_in),
-                    .valid_out(fifo_tb_top_io.valid_out),
-                    .ready_in (fifo_tb_top_io.ready_in),
-                    .data_out (fifo_tb_top_io.data_out));
+                       .reset_n  (fifo_tb_top_io.reset_n),
+                       .valid_in (fifo_tb_top_io.valid_in),
+                       .size     (fifo_tb_top_io.size),
+                       .data_in  (fifo_tb_top_io.data_in),
+                       .valid_out(fifo_tb_top_io.valid_out),
+                       .ready_in (fifo_tb_top_io.ready_in),
+                       .data_out (fifo_tb_top_io.data_out));
 
     initial 
     begin
@@ -36,7 +41,9 @@ module fifo_tb();
             $fatal;
 `endif
         clock = 0;
-        forever begin
+
+        forever 
+        begin
             #(simulation_cycle/2);
             clock = ~clock;
         end

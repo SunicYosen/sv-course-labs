@@ -1,7 +1,6 @@
 // without output 
 
 `timescale 1ns / 1ps
-
 `define FIFO_SIZE = 256
 
 

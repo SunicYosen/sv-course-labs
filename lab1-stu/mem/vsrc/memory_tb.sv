@@ -30,7 +30,7 @@ module mem_test ();
         read_write <= 0;
         addr <= raddr;
         @(negedge clk)
-        rdata <= data_out;
+        rdata = data_out;
     endtask
 
     // Instantiating the memory component !!! 

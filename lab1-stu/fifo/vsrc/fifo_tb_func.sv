@@ -42,4 +42,9 @@ program fifo_test(fifo_tb_io.TB fifo_tb_io_test);
         $display($time, "Task random_rw END!");
     endtask
 
+    task display();  //Display the result of output
+        $display($time, "ns:  Inputs:  ");
+        $display($time, "ns:  Outputs: ");
+    endtask
+
 endprogram
