@@ -4,10 +4,6 @@
  * 2019.11.03
  */
 
-`include "fifo_dut.v"
-`include "fifo_tb_if.sv"
-`include "fifo_tb_funct.sv"
-
 module fifo_tb();
 
     parameter simulation_cycle = 10;
@@ -47,6 +43,6 @@ module fifo_tb();
             #(simulation_cycle/2);
             clock = ~clock;
         end
-end
+    end
 
 endmodule

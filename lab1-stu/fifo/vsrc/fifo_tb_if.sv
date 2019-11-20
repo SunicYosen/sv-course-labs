@@ -12,11 +12,12 @@ interface fifo_tb_io(input bit clock);
     logic [OUTPUT_BITS-1:0]  data_out;
 
     clocking clocking_block @(posedge clock);
-        default input #1 output #1;
+        // default input #1 output #1;
 
         output valid_in;
         output size;
         output data_in;
+        
         input  valid_out;
         input  ready_in;
         input  data_out;
