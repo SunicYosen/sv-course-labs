@@ -8,7 +8,13 @@ VSRC_DIR = $(SRC_DIR)/vsrc
 LOG_DIR =  $(BASE_DIR)/build/log
 BIN_DIR =  $(BASE_DIR)/build/bin
 
-VSRC = $(VSRC_DIR)/alu_tb.sv
+VSRC = $(VSRC_DIR)/alu_tb.sv \
+       $(VSRC_DIR)/alu_tb_if.sv \
+	   $(VSRC_DIR)/alu_tb_func.sv \
+	   $(VSRC_DIR)/define.v \
+	   $(VSRC_DIR)/alu.v \
+	   $(VSRC_DIR)/alu_arithmetic.v \
+	   $(VSRC_DIR)/alu_shift.v
 
 TOP_NAME = alu_tb
 
@@ -20,6 +26,7 @@ VCS_OPTS = -full64 -sverilog \
         -LDFLAGS -Wl,--no-as-needed \
 		-timescale=1ns/10ps \
 		-y $(VSRC_DIR) +libext+.v \
+		-y $(VSRC_DIR) +libext+.sv \
 		-debug_access \
 		-CC "-O3 -Wall" \
 	    -CC "-Wextra -DNDEBUG" \

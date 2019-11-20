@@ -1,5 +1,5 @@
 `timescale 1ns / 1ps
-`include "define.v"
+// `include "define.v"
 
 //******************************************************************
 
@@ -43,7 +43,7 @@ alu_shift alu_shift_s(.clock(clock),
                       .in_data(aluin1),
                       .shift(operation),
                       .shift_operation(opselect),
-                      .alu_sht_out(alu_shift_out));
+                      .alu_shift_out(alu_shift_out));
 
 alu_arithmetic alu_arithmetic_s(.clock(clock),
                                 .reset_n(reset_n),
