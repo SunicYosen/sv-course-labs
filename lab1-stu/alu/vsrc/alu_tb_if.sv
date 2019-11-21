@@ -1,3 +1,10 @@
+
+/* alu_tb_if.sv
+ * Sunic
+ * 2019.11.14
+ * testbench interface
+ */
+
 interface alu_tb_io(input bit clock);
     parameter DATA_WIDTH      = 32;
     parameter OPERATION_WIDTH = 3;

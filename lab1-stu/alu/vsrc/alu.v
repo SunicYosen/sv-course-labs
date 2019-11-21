@@ -1,3 +1,11 @@
+
+/* alu.v
+ * test bench of alu
+ * Sunic
+ * 2019.11.14
+ */
+
+
 `timescale 1ns / 1ps
 // `include "define.v"
 
@@ -37,6 +45,7 @@ reg alu_selection;
 
 assign aluout = alu_selection ? alu_arithmetic_out : alu_shift_out;
 
+// shift 
 alu_shift alu_shift_s(.clock(clock),
                       .reset_n(reset_n),
                       .enable(enable_shift),
@@ -44,7 +53,7 @@ alu_shift alu_shift_s(.clock(clock),
                       .shift(operation),
                       .shift_operation(opselect),
                       .alu_shift_out(alu_shift_out));
-
+//arithmetic
 alu_arithmetic alu_arithmetic_s(.clock(clock),
                                 .reset_n(reset_n),
                                 .enable(enable_arith),

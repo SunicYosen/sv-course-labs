@@ -1,5 +1,5 @@
 /* alu_tb.sv
- * test bench of fifo
+ * test bench of alu
  * Sunic
  * 2019.11.14
  */

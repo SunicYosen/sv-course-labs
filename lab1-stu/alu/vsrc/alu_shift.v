@@ -48,7 +48,7 @@ assign alu_shift_out = shift_operation_reg[2] ? alu_shift_out_last   // No Chang
                                               : (!shift_operation_reg[1]) ? shift_left  // Shift Left
                                                                           : (shift_operation_reg[0] ? shift_right_arithmetic // Shift Right Archithmetic 
                                                                                                     : shift_right_logic);   // Shift Right Logic
-
+// Store input 
 always @(posedge clock)
 begin
     if(!reset_n)
@@ -59,6 +59,7 @@ begin
         in_data_reg <= in_data_reg;
 end
 
+// store shift
 always @(posedge clock)
 begin
     if(!reset_n)
@@ -69,6 +70,7 @@ begin
         shift_reg <= shift_reg;
 end
 
+// store shift operation
 always @(posedge clock)
 begin
     if(!reset_n)
@@ -79,7 +81,7 @@ begin
         shift_operation_reg <= shift_operation_reg;
 end
 
-
+// last output for output nochange when invalid 
 always @(posedge clock)
 begin
     if(!reset_n)

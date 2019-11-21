@@ -1,4 +1,8 @@
-//
+/* alu_tb_func.sv
+ * Sunic
+ * 2019.10.31
+ * testbench tasks
+ */
 
 program alu_test(alu_tb_io.TB alu_tb_io_test);
 
@@ -67,14 +71,15 @@ program alu_test(alu_tb_io.TB alu_tb_io_test);
             payload_aluin1_display <= payload_aluin1.pop_front();
             payload_aluin2_display <= payload_aluin2.pop_front();
 
-            if(run_count <= 8'd30)
+            if(run_count <= 8'd30) // arithmetic alu test
             begin
                 // $display($time, "Test Arithmetic ALU BEGIN ...");
                 enable_arithmetic_alu_display                       <= 1'b1;
                 enable_shift_alu_display                            <= 1'b0;
                 operation_display                                   <= run_count[2:0];
                 opselect_display                                    <= 3'b001;
-
+                
+                // Send payloads
                 alu_tb_io_test.clocking_block.enable_arithmetic_alu <= enable_arithmetic_alu_display;
                 alu_tb_io_test.clocking_block.enable_shift_alu      <= enable_shift_alu_display;
                 alu_tb_io_test.clocking_block.alu_data_in_1     	<= payload_aluin1_display;
@@ -84,7 +89,7 @@ program alu_test(alu_tb_io.TB alu_tb_io_test);
                 // $display($time, "Test Arithmetic ALU END.");
             end
 
-            else if(run_count <= 8'd60)
+            else if(run_count <= 8'd60) // shift alu test
             begin
                 // $display($time, "Test Shift ALU BEGIN ...");
                 enable_arithmetic_alu_display                       <= 1'b0;
@@ -101,8 +106,8 @@ program alu_test(alu_tb_io.TB alu_tb_io_test);
                 // $display($time, "Test Shift ALU END.");
             end
 
-            else
-            begin
+            else   // Random test
+            begin   
                 // $display($time, "Test ALU RANDOMLY BEGIN ...");
                 enable_arithmetic_alu_display                       <= payload_aluin1_display[1];  //Random
                 enable_shift_alu_display                            <= payload_aluin2_display[1];
@@ -129,7 +134,7 @@ program alu_test(alu_tb_io.TB alu_tb_io_test);
         $display($time, "ns:  --------------------------------------------------------.");
     endtask
 
-    task display_func();
+    task display_func();  //display
 
         if(run_count == 8'd1)
             begin
