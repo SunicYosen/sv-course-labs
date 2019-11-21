@@ -1,5 +1,5 @@
 /* fifo_tb_top.sv
- * test bench of fifo
+ * test bench top of fifo
  * Sunic
  * 2019.11.03
  */

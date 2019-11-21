@@ -30,6 +30,7 @@ module fifo_dut(clock,
 
 //**************Please add your code below ****************************
 
+// Instance FIFO module
 fifo #(.FIFO_SIZE(256)) 
      fifo1(.clock(clock),
            .reset_n(reset_n),

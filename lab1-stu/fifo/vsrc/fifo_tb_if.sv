@@ -1,3 +1,10 @@
+/* fifo_tb_if.sv
+ * test bench interface of fifo
+ * Sunic
+ * 2019.11.03
+ */
+
+
 interface fifo_tb_io(input bit clock);
     parameter FIFO_DEEPTH = 256;
     parameter INPUT_WIDTH = 64;
@@ -11,7 +18,7 @@ interface fifo_tb_io(input bit clock);
     logic                    ready_in;
     logic [OUTPUT_BITS-1:0]  data_out;
 
-    clocking clocking_block @(posedge clock);
+    clocking clocking_block @(posedge clock);  //Clocking block
         // default input #1 output #1;
 
         output valid_in;
@@ -23,5 +30,5 @@ interface fifo_tb_io(input bit clock);
         input  data_out;
     endclocking
 
-    modport TB(clocking clocking_block, output reset_n);
+    modport TB(clocking clocking_block, output reset_n); // Mod port
 endinterface

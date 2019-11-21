@@ -1,4 +1,9 @@
-// without output 
+/* fifo.v
+ * fifo module
+ * Sunic
+ * 2019.11.03
+ */
+ 
 
 `timescale 1ns / 1ps
 `define FIFO_SIZE = 256
@@ -29,7 +34,7 @@ output reg         valid_out;
 output             ready_in;
 output reg [31:0]  data_out;
 
-reg    [7:0]    fifo_mem    [0: FIFO_SIZE-1];
+reg    [7:0]    fifo_mem    [0: FIFO_SIZE-1];  //FIFO Memory
 reg    [7:0]    write_addr;
 reg    [7:0]    read_addr;
 
@@ -89,7 +94,7 @@ end
 //         data_remain  <= data_remain;
 // end
 
-// Write a clock delay
+//write Input 0 Byte
 always @(posedge clock or negedge reset_n)
 begin
     if(!reset_n)
@@ -100,6 +105,7 @@ begin
         fifo_mem[write_addr] <= fifo_mem[write_addr];
 end
 
+//write Input 1 Byte
 always @(posedge clock or negedge reset_n)
 begin
     if(!reset_n)
@@ -110,19 +116,21 @@ begin
         fifo_mem[write_addr+1] <= fifo_mem[write_addr+1];
 end
 
+//write Input 3-2 Byte
 always @(posedge clock or negedge reset_n)
 begin
     if(!reset_n)
-        {fifo_mem[write_addr+2], fifo_mem[write_addr+3]} <= 16'h0000;
+        {fifo_mem[write_addr+3], fifo_mem[write_addr+2]} <= 16'h0000;
 
     else if(ready_in & valid_in & (size[1]))
-        {fifo_mem[write_addr+2], fifo_mem[write_addr+3]} <= data_in[31:16];
+        {fifo_mem[write_addr+3], fifo_mem[write_addr+2]} <= data_in[31:16];
 
     else
-        {fifo_mem[write_addr+2], fifo_mem[write_addr+3]} <= 
-        {fifo_mem[write_addr+2], fifo_mem[write_addr+3]};
+        {fifo_mem[write_addr+3], fifo_mem[write_addr+2]} <= 
+        {fifo_mem[write_addr+3], fifo_mem[write_addr+2]};
 end
 
+//write Input 7-4 byte
 always @(posedge clock or negedge reset_n)
 begin
     if(!reset_n)
@@ -130,8 +138,8 @@ begin
          fifo_mem[write_addr+6],fifo_mem[write_addr+7]} = 32'b0000_0000;
 
     else if(ready_in & valid_in & (size[1] & size[0]))
-        {fifo_mem[write_addr+4],fifo_mem[write_addr+5], 
-         fifo_mem[write_addr+6],fifo_mem[write_addr+7]} = data_in[63:32];
+        {fifo_mem[write_addr+7],fifo_mem[write_addr+6], 
+         fifo_mem[write_addr+5],fifo_mem[write_addr+4]} = data_in[63:32];
 
     else
         {fifo_mem[write_addr+4],fifo_mem[write_addr+5], 
@@ -140,6 +148,7 @@ begin
          fifo_mem[write_addr+6],fifo_mem[write_addr+7]};
 end
 
+// Valid out outputs
 always @(posedge clock or negedge reset_n)
 begin
     if(!reset_n)
@@ -148,6 +157,8 @@ begin
         valid_out <= valid_out_temp;
 end
 
+
+// Data out
 always @(posedge clock or negedge reset_n)
 begin
     if(!reset_n)

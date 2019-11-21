@@ -1,6 +1,9 @@
-//
 
-//program Execute_test(Execute_io.TB Execute);
+/* fifo_tb_func.sv
+ * test bench functions of fifo
+ * Sunic
+ * 2019.11.03
+ */
 
 program fifo_test(fifo_tb_io.TB fifo_tb_io_test);
 
@@ -24,22 +27,23 @@ program fifo_test(fifo_tb_io.TB fifo_tb_io_test);
     wire                    valid_out;
     wire [OUTPUT_BITS-1:0]  data_out;
 
-    assign ready_in  = fifo_tb_io_test.clocking_block.ready_in;
+    //read from fifo
+    assign ready_in  = fifo_tb_io_test.clocking_block.ready_in;   
     assign valid_out = fifo_tb_io_test.clocking_block.valid_out;
     assign data_out  = fifo_tb_io_test.clocking_block.data_out;
 
     initial begin
-        reset_n();
+        reset_n();  //reset
         run_n_times_count = 0;
         repeat(run_n_times) 
             begin
                 $display($time, "ns:  Function Testing ... %2d/%2d",run_n_times_count, run_n_times);
                 seed = $get_initial_random_seed() + run_n_times_count;
-                payload_gen();
-                write_full();
-                write_data_empty();
-                read_data_empty();
-                run_n_times_count ++;
+                payload_gen();         // gen random input data
+                write_full();          // Write fifo until full 
+                write_data_empty();    // Write all payload data to fifo
+                read_data_empty();     // Read all fifo
+                run_n_times_count ++;  // Iteration
             end
     	repeat(5) @(fifo_tb_io_test.clocking_block);
     end
@@ -71,10 +75,12 @@ program fifo_test(fifo_tb_io.TB fifo_tb_io_test);
             size_display      <= payload_size.pop_front();
             valid_in_display  <= 1'b1;
 
+            // Send data
             fifo_tb_io_test.clocking_block.data_in  <= data_in_display;
             fifo_tb_io_test.clocking_block.valid_in <= valid_in_display;
-            fifo_tb_io_test.clocking_block.size     <= size_display;           
+            fifo_tb_io_test.clocking_block.size     <= size_display;  
 
+            //Display
             display_in();
             display_out();
             
@@ -106,11 +112,12 @@ program fifo_test(fifo_tb_io.TB fifo_tb_io_test);
                 valid_in_display <= 1'b0;
             else
                 valid_in_display <= 1'b1;
-
+            // send data
             fifo_tb_io_test.clocking_block.data_in  <= data_in_display;
             fifo_tb_io_test.clocking_block.valid_in <= valid_in_display;
             fifo_tb_io_test.clocking_block.size     <= size_display;           
 
+            // Display
             display_in();
             display_out();
             
@@ -133,12 +140,14 @@ program fifo_test(fifo_tb_io.TB fifo_tb_io_test);
 
             data_in_display   <= 64'h0000_0000_0000_0000;
             size_display      <= 2'b00;
-            valid_in_display  <= 1'b0;
+            valid_in_display  <= 1'b0;    // do not write fifo
 
+            // Send data
             fifo_tb_io_test.clocking_block.data_in  <= data_in_display;
             fifo_tb_io_test.clocking_block.valid_in <= valid_in_display;
             fifo_tb_io_test.clocking_block.size     <= size_display;  
 
+            //Display
             display_in();
             display_out();
             @(fifo_tb_io_test.clocking_block);
