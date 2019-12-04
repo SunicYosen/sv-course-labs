@@ -11,8 +11,8 @@ interface router_io(input bit clock);
   logic [15:0]	frameo_n;
 
   clocking cb @(posedge clock);
-
     default input #1ns output #1ns;
+    
     output reset_n;
     output din;
     output frame_n;
