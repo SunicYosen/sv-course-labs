@@ -127,6 +127,7 @@ program automatic test(router_io.TB rtr_io);
 
   //Declare the get_payload() task
   task get_payload();
+    $display($time, "ns : Get pay load Start ...");
 
     //In get_payload() delete content of pkt2cmp_payload[$]
     pkt2cmp_payload.delete();
@@ -137,12 +138,12 @@ program automatic test(router_io.TB rtr_io);
     fork
       begin: wd_timer_fork
       fork: frameo_wd_timer
-        //Do not use @(negedge rtr_io.cb.frameo_n[da]);
-		    //This may cause timing issues because of how the LRM defines it.
+        // Do not use @(negedge rtr_io.cb.frameo_n[da]);
+		    // This may cause timing issues because of how the LRM defines it.
 		    
         begin
-		      wait(rtr_io.cb.frameo_n[da] != 0);
-		      @(rtr_io.cb iff(rtr_io.cb.frameo_n[da] == 0 ));
+		      wait(rtr_io.cb.valido_n[da] != 0);
+		      @(rtr_io.cb iff(rtr_io.cb.valido_n[da] == 0));
 		    end
         
         begin                              //this is another thread
@@ -150,8 +151,9 @@ program automatic test(router_io.TB rtr_io);
       	  $display("\n%m\n[ERROR]%t Frame signal timed out!\n", $realtime);
           $finish;
         end
-        join_any: frameo_wd_timer
-        disable fork;
+      join_any: frameo_wd_timer
+      disable fork;
+
       end: wd_timer_fork
 
     join
@@ -163,25 +165,29 @@ program automatic test(router_io.TB rtr_io);
     forever 
     begin
       logic[7:0] datum;
+
       for(int i=0; i<8; i=i+1)
-      begin 
-        $display($time, "i");
+      begin
         if(!rtr_io.cb.valido_n[da])
           datum[i] = rtr_io.cb.dout[da];
 
         if(rtr_io.cb.frameo_n[da])
-          if(i==8) begin // byte alligned
+          if(i == 7) 
+          begin          // byte alligned
       	    pkt2cmp_payload.push_back(datum);
       	    return;      // done with payload
       	  end
 
           //If payload is not byte aligned, print message and end simulation
-      	  else begin
+      	  else 
+          begin
       	    $display("\n%m\n[ERROR]%t Packet payload not byte aligned!\n", $realtime);
       	    $finish;
       	  end
+
         @rtr_io.cb;
       end
+
       pkt2cmp_payload.push_back(datum);
     end
   endtask: get_payload
