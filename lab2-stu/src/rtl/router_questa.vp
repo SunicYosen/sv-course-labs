@@ -1,0 +1,91 @@
+// control pins:
+// input: reset_n	- active low reset
+// input: clock		- master clock input
+
+// input port pins:
+// input: frame_n	- must be active during whole input packet
+// input: valid_n	- valid data input
+// input: di		- the data input
+// output: busy_n	- tells input that connection is busy 
+
+// output port pins:
+// output: do		- the data output
+// output: valido_n	- tells output device that "do" contain valid data
+// output: frameo_n	- active during the whole output packet
+// frame format:
+//
+// Frame start must look like this:
+//
+// frame_n:	|  1 |  0 |  0 |  0 |  0 |  0 |  0 |  0 |  0 |  0  | ...
+// di:		|  X | A0 | A1 | A2 | A3 |  1 |  X |  X |  X | D0  | ...
+// valid_n:	|  X |  X |  X |  X |  X |  X |  1 |  1 |  1 | 0/1 | ...
+//
+// note1: frame_n must deasserted at least one cycle between packets.
+// note2: address data does not have to wait for busy_n = 1.
+// note3: di must wait for busy_n = 1.
+// note4: a di is taken by the chip if:  busy_n == 1 && valid_n == 0
+// note5: frame_n must be deasserted with the last data bit in the frame.
+// note6: once connection is successfully made, busy_n is guaranteed to
+//	  stay inactive until to the end of the current frame.
+module router(
+    reset_n, clock, frame_n, valid_n, din, dout, busy_n, valido_n, frameo_n);
+
+input reset_n, clock;
+
+input [15:0] din, frame_n, valid_n;
+
+output [15:0] dout, valido_n, busy_n, frameo_n;
+
+`protected
+
+    MTI!#IonxB#BJsQ>IC[pWWO5XjY^#GplUoxW\|.>{E[yqY"xz][~X*>b$'-_TxsX]n]>&d'~}]Ol
+    QB[^a#t}%=zJwxO>oRe{u=rvAAjm,/H_$T#aA*m$wQ-]<Gm$sl)[irlY@G-LC2>ItT$zwiwn;:a<
+    Dxu>@Vm'm\+=WBD~5o=#5]kp{#Ou_>v^ZZuEn^wtE#\{e,uv=DiA3_Al\5Z5G^]Am_X'&QJo}Go[
+    B#5z7}+wnxo#UVuG@[lsT@a{pCD#}#7Qu#Gv-1@]Wl=-UTNY?m'P+o,x\/R_YR]7'Jor1T2]!^/0
+    |:[+xTli\^Z=#]H^sEj;;CT\lp!XDDv#L5mBl4pB<r'I#k=]e1#AjrTU<nY3{RKB#2m^D[s?uJm'
+    G5:,#Ev+jI>rZ-C.Ks5*ZYH71nuw1oDu^s,7v;xu$AXW@{mpY5woQRa'7_wK2$ose2[H1^]z>+I#
+    0'!jO@ru'0~wJ[!5+#Y;sV7Zpzws!xpA{'1BoYKao2GrZK5W@pmC>R5sxU=n~[>^R{27U<k]k~^&
+    c<rD-!GB\*v2E,a<<aI1BnT;K!j?Iu=3?ujjpGz\H7vBBHw2D3*>KDIZs/_2I=FQJ,A=VIW|~{av
+    <rRC?a<u<CH_>oD-@r^<*s[[p@EO<G<l@$RmuU}~B;{r=wv<i$3r2E;Z^CII#x$E|U^oIHr_aK1;
+    oJ'Z]]p>?O/Qi[uli1[^ap]jlx\,<=?e@uIx+5@g)YEi_Up?wsV>Y}uoJxQO\oIAIMe=JB+RB?e#
+    ^krAGvKlJZk{pi[*+w{7*lpa^Q%Z-YAsU)*Rzv1_e5sDun8ejUGZa>TUHC*_RuG,QKTUx,@UDeH}
+    [BVCYrjyJxon[AJTA<GkLh^x+$wAHsBKjn5h$\~;=loD#}Co/Z-JD^1z*k\;<lmEv+E~xE;5*$Hv
+    X]+]@P'1TRx3K~RpH~5>vlrGE^xWep@pVB2>@lJ6]*zEVa'?L#z3jEpJn1UQ?>_M+^i~Y{ET@]p=
+    e+7D_l+#em<57vK>0ETeDRz$;XTZ@1>nxHxTEJYQ?\?G}f#7ezm{p^@w1Bz=]$B$A_.Di@?.RABr
+    l~$IWz;~YmT-IY/&9o@[nVB@!vI*=Y'x=3zeR;TjXue@C1'E2S'rW'C{jYra}>?VGrRiQE1Ae[q3
+    o'C]Zspi[_I@XL6sv{@JE3TECx=7_2,is$p{5<Omv]=[Q\A}}mIUT~G3<JJ~TjH+[Iz]TEpJ{lE{
+    oX^h]OH#hwrHaYI5U][5QjZzO]Z3Q;RnT<8xe]{1kmGpp5s'ez1|QuQAKTUpBmoGUBI\opX{5=!$
+    lk{r1+'K{o#B\MVa;{eZ},oGa'Y<~;m+X#^]-n'jrj3e<u>w*#iQw2]e@5r$<WQ+1]vK3sf.d#{T
+    x[u'Y<$@$}5\+DV@a5GGx|NO!]RQ$$um_pkap_O/!j2=[e$W}!]ilYp\LnX*!H&|S-Y#}vWXY'~+
+    ]>XH3iokTBZT_..wX-E,i^@kH-_}rHQd#>-Jl#XoQI]C{C]*B>VUT}Q*8VYV{<wjuaeH<]*^]PFo
+    T{2k}VUww+J[OT]vp5}?Ez@[}5-]RWXA5#]K.Uw;YKDUm=x_z7+VHkDVk+V[H,8$'~=H[Ax?xmW5
+    }pYR=<W1R^J:>n[\No-\7b==Z^;I@@s\m-lO~AsmjvGm$zLxJ1}ieXjo+!~'3{l.(j7[oC#\s]C=
+    X*3s31]eeR]o^jMZ1^[UpD[mIkveu_lYk*aKX\iU<j\-=k~^1#1l!e@NevrE7H$#Hw7ao2pC~lKx
+    POLF'X12/opnK//\v{3IEBD'GYYr~WA{ll]$>$kI0z+^*UrQlJz@_Iz[?a=!B53[?&7#<Zz5u;aG
+    K}IkJXQZ\la+B-HtsK1a{SA<{]~UY~}ykDG-\3+=I[\VGUDnIRs+xz,T7uYC!$1j~r!AV\Y>Bs{o
+    ]vYrn>IDD_KEo_\C~HA33]^}B>AY*C1X{XXB5@+\;DJ+=poJV#3Bi<7A!R\D[_!5DkT=:D$T$B,V
+    {7n}mk+]oH5\@#U@>os!RB?vmpojQpUlZi{R57\BT4@j@B"plsn^}ZoOO1pL*}^p_iz2'[+Yc3oT
+    vl2p#j+r>!*RpI@ZDg~x$[p!uInva[MZ{V$>Q?ThQ*Q!-VIZ~v{xslR!^{'1,z_XC5\v%${Ya^Cr
+    5G#,U2Buo!UB5;o7zIAXXevnU<j?5_Eo;o*HW?Qao<w75nlO;+n*K}Dvaw{nkvo@TB}-@~>[jxk-
+    -]G\CQ@zTQ_lmpQXpL=+W[+z\G9=;DB{C_\V}\,wBe-;VC]~,*Z9Rz]zHxXO8.JI-2dsrX{p_mpD
+    _-[W7>p=1;Z/<\J#@w+VoJjaeuC\-*BD;Avwfnz}pCQ+p5+v]!olO~^!T>$'>6GklrV_\$>5{1_J
+    \TyQ+e,&x.PxQ<Ivmn~5?s>*nj#=k\K~zC_MW_KvCToU}Je[g3CvaRATa{swG@nEpVD'@\l2r$A$
+    G!7C3YHuK#EepGYi1xC^kI;uYpbrv*xl=uKxT<@ouU5v]?KlW~W]ATRO(VWaDe,*W%b~QjjsQRi#
+    A{ljRp+vu>O=x~X,vp;AV]2^3s;qp;'7lCxD<'U1++B3#ox*OQ!7WU]R\p$Tl<W?Vi{O7C5QX'<a
+    Z=>lIzRBrieZIRXYixiv3HV=]YC;v=j7q@j7u?[zRYwRkrra;Cwp_BV'OGI@^xKJx2rs$ex=}7Yj
+    TI'K<H{z+B1@eErKD*e,n1,,5qneA?mzU;z+jK;Y5{OwEXorDoA*XzzY11=-+EG+Z$r{WKxB_2QH
+    xGkUnk8GB{2;Y@3rI#wms>>5$%773]olG]Z'_Rlu{Dx+\o[^7B<GrH'[,\B1@#|XT-erlDvCn,,K
+    sja1{]Wo\3>O~3~p+HK3ap-{l3<mCx5~vAI_A.QGn~~pO['{xDn{$#.DG-<Rp'27iK7]G,O=*mER
+    O~~^+>J[Y\z@r=xHOmpkwGY^3prgvvK^EpjBvzRmIAClUG+WBRk';$!7,H-X}i-ewn=[uzQ>5X[!
+    *youW}=>+VUBTk{H7]-e?DQOExwT~W}C',R_@Y'.SQjCD@'ivR;@WKRBK[~v7<[;=5!!j,ns?{H+
+    nu<$$*A^?g/L<+a[xJBp=m]~JxD]]'Q^eUCC3e\!!]1IKTOXFBwe1p\#Xexn]B>O1nU~'*>EozCz
+    iK}=Rk\RxO77_?wa$[>{?+]piOm5*-vCICuJw,rQzYAX{2.oZ*!JCksI}U;5|aD{ehXjC#<7uWL@
+    aX{AU7Bor],kRkj7-n~iVRe>aZ\OBzHV>G>IC{^wsC?KOJn?[H!djsT1<<pl\H<]~{mwrmD=QiKO
+    J,Hl[@JpWOe~9R>>],=z!UeBKXp{r'\^$36GHjI+E3#onlHZ$\_zKe35Y,JHU3j~6XD@U*;nA[J{
+    ?*1il|''7GGVREd},KG.xBIV3a3U~],!O\m$l\m;\Yx1eUCUHl3wDKQiJCR~aw@Ymo*K][;KC#^-
+    1DuU,]v'G7GxoP^I;}^G]eo!$Ec%+(*}K7@<mO7B\l{vE!ZTH'xE1aYr3R[lr-O?Oz,2^G)$#a'w
+    n[<Q,+vvkO/_a]ViXY[GZjnv;5W?aB3Y~AI]Vj$Z5Gl}u-xr;+#CR=
+`endprotected
+
+
+endmodule  
