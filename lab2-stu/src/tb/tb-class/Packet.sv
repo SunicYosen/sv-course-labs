@@ -10,24 +10,23 @@ class Packet;
 
   //In the body of the class create the following properties
   
-  rand bit[3:0] sa, da;
-  rand logic[7:0] payload[$];
-       string   name;
+  rand bit   [3:0] sa
+  rand bit   [3:0] da;
+  rand logic [7:0] payload[$];
+  string           name;
 
   //In body of the class
- 
   constraint valid {
   	sa inside { [0:15] };
-	da inside { [0:15] };
-	payload.size() inside { [2:4] };
+	  da inside { [0:15] };
+	  payload.size() inside { [2:4] };
   }
 
   //In body of the class
   //Add prototype declarations of the following methods
-
-  extern function new(string name = "Packet");
-  extern function bit compare(Packet pkt2cmp, ref string message);
-  extern function void display(string prefix = "NOTE");
+  extern function        new(string name = "Packet");
+  extern function bit    compare(Packet pkt2cmp, ref string message);
+  extern function void   display(string prefix = "NOTE");
   extern function Packet copy();
 
 endclass: Packet
@@ -38,8 +37,8 @@ endclass: Packet
 function Packet::new(string name);
 
   //Inside new() assign class property name with string passed via argument
-  
   this.name = name;
+
 endfunction: new
 
 
@@ -48,8 +47,6 @@ endfunction: new
 //Modify the argument list to add a Packet handle
 
 function bit Packet::compare(Packet pkt2cmp, ref string message);
-
-
   //In compare() compare data payload[$] with pkt2cmp_payload[$]
   //If sizes do not match
   //   set string argument with description of error
@@ -61,23 +58,29 @@ function bit Packet::compare(Packet pkt2cmp, ref string message);
   //   set string argument with description of error
   //   terminate subroutine by returning a 0
   
-  if(payload.size() != pkt2cmp.payload.size()) begin
+  if(payload.size() != pkt2cmp.payload.size()) 
+  begin
     message = "Payload size Mismatch:\n";
     message = { message, $sformatf("payload.size() = %0d, pkt2cmp.payload.size() = %0d\n", payload.size(), pkt2cmp.payload.size()) };
     return (0);
   end
+
   if(payload == pkt2cmp.payload) ;
-  else begin
+
+  else 
+  begin
     message = "Payload Content Mismatch:\n";
     message = { message, $sformatf("Packet Sent:   %p\nPkt Received:   %p", payload, pkt2cmp.payload) };
     return (0);
   end
+
   message = "Successfully Compared";
   return(1);
+
 endfunction: compare
 
 
-  //In compare() change all pkt2cmp_payload references to pkt2cmp.payload
+//In compare() change all pkt2cmp_payload references to pkt2cmp.payload
   
 //Define the display() function
 
