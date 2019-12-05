@@ -4,7 +4,7 @@ module router_test_top;
 
   parameter simulation_cycle = 10;
   reg [2047:0]   vcdplusfile = 0;
-  bit       SystemClock      = 0;
+  bit            SystemClock = 0;
 
   router_io top_io(SystemClock);
   test           t(top_io);

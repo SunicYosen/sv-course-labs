@@ -10,7 +10,7 @@ class Packet;
 
   //In the body of the class create the following properties
   
-  rand bit   [3:0] sa
+  rand bit   [3:0] sa;
   rand bit   [3:0] da;
   rand logic [7:0] payload[$];
   string           name;

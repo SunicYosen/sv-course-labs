@@ -5,11 +5,14 @@
 # Makefile by simulator the verilog/systemverilog project based on VCS
 
 TB_CLASS_DIR   = $(SRC_DIR)/tb/tb-class
-TB_CLASS_FILES = $(wildcard $(TB_CLASS_DIR)/*.sv)
 
-# TB_CLASS_FILES = $(TB_CLASS_DIR)/router_test_top.sv \
-#                    $(TB_CLASS_DIR)/router_io.sv \
-#                    $(TB_CLASS_DIR)/test.sv
+# TB_CLASS_FILES = $(TB_CLASS_DIR)/Packet.sv \
+                   $(TB_CLASS_DIR)/Generator.sv \
+				   $(TB_CLASS_DIR)/router_io.sv \
+				   $(TB_CLASS_DIR)/router_test_top.sv \
+				   $(TB_CLASS_DIR)/test.sv
+
+TB_CLASS_FILES = $(wildcard $(TB_CLASS_DIR)/*.sv)
 
 TB_CLASS ?= tb_class
 
@@ -22,7 +25,7 @@ BIN_CLASS       = $(BIN_DIR)/$(TB_CLASS).vsim
 
 $(BIN_CLASS): $(TB_CLASS_FILES) $(RTL_FILES)
 	mkdir -p $(BIN_DIR) && \
-	$(VCS) $(VCS_OPTS) $^ -o $@
+	$(VCS) $(VCS_OPTS) +incdir+$(TB_CLASS_DIR) $^ -o $@
 
 $(LOG_CLASS_FILE): $(BIN_CLASS)
 	mkdir -p $(LOG_DIR)
