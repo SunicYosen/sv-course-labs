@@ -4,7 +4,7 @@
 typedef mailbox #(Packet) pkt_mbox;
 
 class Generator;
-  int        run_for_n_packets =2000;
+  int        run_for_n_packets = 33000;
   string     name;		            // unique identifier
   Packet     pkt2send;	          // stimulus Packet object
   pkt_mbox   out_box;	            // mailbox to Drivers
@@ -18,15 +18,15 @@ class Generator;
 endclass: Generator
 
 function Generator::new(string name, int port_id);
-  this.name     = name;
-  this.pkt2send = new();
-  this.out_box  = new(1);    //1-deep mailbox
-  this.port_id  = port_id;
+  this.name                  = name;
+  this.pkt2send              = new();
+  this.out_box               = new(1);    // 2000-deep mailbox
+  this.port_id               = port_id;
 endfunction: new
 
 task Generator::gen();
-  this.pkt2send.name = $sformatf("Packet[%0d]", this.pkts_generated++);
-
+  $display($time, "ns: Packet Gen: %5d/%5d", pkts_generated, run_for_n_packets);
+  this.pkt2send.name = $sformatf("Packet[%0d]", this.pkts_generated++);   // Packet[0:1999]
   if (!this.pkt2send.randomize() with {if (port_id != -1) sa == port_id;})
   begin
     $display("\n%m\n[ERROR]%t Randomization Failed!\n", $realtime);
@@ -36,7 +36,7 @@ endtask: gen
 
 task Generator::start();
   fork
-    while (this.pkts_generated <run_for_n_packets || run_for_n_packets <= 0) 
+    while (this.pkts_generated < run_for_n_packets || run_for_n_packets <= 0) 
     begin
       this.gen();
       begin
@@ -45,7 +45,6 @@ task Generator::start();
       end
     end
   join_none
-  
 endtask: start
 
 `endif

@@ -10,9 +10,9 @@ class Packet;
 
   //In the body of the class create the following properties
   
-  rand bit   [3:0] sa;
-  rand bit   [3:0] da;
-  rand logic [7:0] payload[$];
+  randc bit   [3:0] sa;
+  randc bit   [3:0] da;
+  rand  logic [7:0] payload[$];
   string           name;
 
   //In body of the class
@@ -30,9 +30,6 @@ class Packet;
   extern function Packet copy();
 
 endclass: Packet
-
-//Outside the class body
-
 
 function Packet::new(string name);
 
@@ -78,16 +75,12 @@ function bit Packet::compare(Packet pkt2cmp, ref string message);
   return(1);
 
 endfunction: compare
-
-
 //In compare() change all pkt2cmp_payload references to pkt2cmp.payload
   
 //Define the display() function
-
-
-
 function void Packet::display(string prefix);
   $display("[%s]%t %s sa = %0d, da = %0d", prefix, $realtime, name, sa, da);
+  
   foreach(payload[i])
     $display("[%s]%t %s payload[%0d] = %0d", prefix, $realtime, name, i, payload[i]);
 endfunction

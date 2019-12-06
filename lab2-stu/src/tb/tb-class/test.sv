@@ -1,56 +1,65 @@
+`include "Generator.sv"
+`include "Driver.sv"
+`include "Receiver.sv"
+`include "Scoreboard.sv"
+
 program automatic test(router_io.TB rtr_io);
+  int run_for_n_packets = 2000; // number of packets to test
+  int run_times = 0;
+  int in_ports          = 16;
 
-  `include "Generator.sv"
-
-  Packet  pkt= new();
-  pkt_mbox in_box;
-  int run_for_n_packets; // number of packets to test
-
-  Generator gen[];       // generator
-
-
-  logic[7:0] pkt2cmp_payload[$];      // actual packet data array
-
-  //Declare and construct two Packets pkt2send and pkt2cmp
-
-  Packet pkt2cmp  = new();
+  logic [7:0] pkt2cmp_payload[$];   // actual packet data array
+  pkt_mbox    in_box;
+  Packet      pkt[];
+  Packet      pkt2cmp = new();         // Declare and construct two Packets pkt2send and pkt2cmp
+  Generator   gen[];                   // generator
 
   initial 
   begin
+    gen = new[1];            // gen input ports Generator
+    foreach (gen[i]) gen[i] = new($sformatf("gen[%0d]", i), i); // new("gen[i]",i]
     
-    run_for_n_packets = 2000;
+    pkt = new[in_ports];            // Input packets
 
-    gen = new[1];
-
-    foreach (gen[i]) gen[i] = new($sformatf("gen[%0d]", i), i);
-
-      reset();
-
-    repeat(run_for_n_packets) 
+    reset();
+    gen[0].start();
+    repeat(run_for_n_packets)
     begin
+      $display("-------------------%4d/%4d-------------------", run_times+1, run_for_n_packets);
+      in_box = gen[0].out_box;
       
-      gen[0].start();
-      in_box = gen[0].out_box;  //ADD
-      in_box.get(pkt);
+      for (int pkt_index = 0; pkt_index < in_ports; pkt_index ++)
+      begin
+        in_box.get(pkt[pkt_index]);
+        $display("sa= %2d, da= %2d",pkt[pkt_index].sa, pkt[pkt_index].da);
+      end
 
       fork
         send();
         recv();
       join
-    
+
+      run_times ++;
     end
+
     repeat(10) @(rtr_io.cb);
+
+    $finish;
   end
   
   task reset();
-    rtr_io.reset_n = 1'b0;
-    rtr_io.cb.frame_n <= '1;
-    rtr_io.cb.valid_n <= '1;
-    repeat(2) @rtr_io.cb;
-    rtr_io.cb.reset_n <= 1'b1;
-    repeat(15) @(rtr_io.cb);
-  endtask: reset
+    $display($time, "ns : Reset Start ...");
+    rtr_io.reset_n     = 1'b0;
+    rtr_io.cb.frame_n <=  '1;
+    rtr_io.cb.valid_n <=  '1;
 
+    repeat(2) @rtr_io.cb;
+
+    rtr_io.cb.reset_n <= 1'b1;
+
+    repeat(15) @(rtr_io.cb);
+    $display($time, "ns : Reset END.");
+  endtask: reset
 
   task send();
     send_addrs();
@@ -59,29 +68,35 @@ program automatic test(router_io.TB rtr_io);
   endtask: send
 
   task send_addrs();
-    rtr_io.cb.frame_n[pkt.sa] <= 1'b0; //start of packet
+    $display($time, "ns : Send Addrs Start ...");
+    rtr_io.cb.frame_n[pkt[0].sa] <= 1'b0;    //start of packet
     for(int i=0; i<4; i++) begin
-      rtr_io.cb.din[pkt.sa] <= pkt.da[i]; //i'th bit of da
+      rtr_io.cb.din[pkt[0].sa] <= pkt[0].da[i]; // i'th bit of da
       @(rtr_io.cb);
     end
+    $display($time, "ns : Send Addrs END.");
   endtask: send_addrs
 
   task send_pad();
-    rtr_io.cb.frame_n[pkt.sa] <= 1'b0;
-    rtr_io.cb.din[pkt.sa] <= 1'b1;
-    rtr_io.cb.valid_n[pkt.sa] <= 1'b1;
+    $display($time, "ns : Send Pad Start ...");
+    rtr_io.cb.frame_n[pkt[0].sa] <= 1'b0;
+    rtr_io.cb.din[pkt[0].sa] <= 1'b1;
+    rtr_io.cb.valid_n[pkt[0].sa] <= 1'b1;
     repeat(5) @(rtr_io.cb);
+    $display($time, "ns : Send Pad END.");
   endtask: send_pad
 
   task send_payload();
-    foreach(pkt.payload[index])
+    $display($time, "ns : Send Payload Start ...");
+    foreach(pkt[0].payload[index])
       for(int i=0; i<8; i++) begin
-        rtr_io.cb.din[pkt.sa] <= pkt.payload[index][i];
-        rtr_io.cb.valid_n[pkt.sa] <= 1'b0; //driving a valid bit
-        rtr_io.cb.frame_n[pkt.sa] <= ((i == 7) && (index == (pkt.payload.size() - 1)));
+        rtr_io.cb.din[pkt[0].sa] <= pkt[0].payload[index][i];
+        rtr_io.cb.valid_n[pkt[0].sa] <= 1'b0; //driving a valid bit
+        rtr_io.cb.frame_n[pkt[0].sa] <= ((i == 7) && (index == (pkt[0].payload.size() - 1)));
         @(rtr_io.cb);
       end
-    rtr_io.cb.valid_n[pkt.sa] <= 1'b1;
+    rtr_io.cb.valid_n[pkt[0].sa] <= 1'b1;
+    $display($time, "ns : Send Payload END.");
   endtask: send_payload
 
   task recv();
@@ -91,10 +106,10 @@ program automatic test(router_io.TB rtr_io);
     get_payload();
 
     //Assign pkt2cmp.da with global da
-    pkt2cmp.da = pkt.da;
+    pkt2cmp.da = pkt[0].da;
 
     //Assign pkt2cmp.payload with pkt2cmp_payload
-    pkt2cmp_payload = pkt.payload;
+    pkt2cmp_payload = pkt[0].payload;
 
     //Set a unique name for pkt2cmp. Use pkt_cnt
     pkt2cmp.name = $sformatf("rcvdPkt[%0d]", pkt_cnt++);
@@ -102,6 +117,7 @@ program automatic test(router_io.TB rtr_io);
   endtask: recv
 
   task get_payload();
+    $display($time, "ns : Get Payload Start ...");
 
     pkt2cmp_payload.delete();
 
@@ -111,8 +127,8 @@ program automatic test(router_io.TB rtr_io);
         //Do not use @(negedge rtr_io.cb.frameo_n[da]);
 		    //This may cause timing issues because of how the LRM defines it.
         begin
-          wait(rtr_io.cb.frameo_n[pkt.da] != 0);
-          @(rtr_io.cb iff(rtr_io.cb.frameo_n[pkt.da] == 0 ));
+          wait(rtr_io.cb.valido_n[pkt[0].da] != 0);
+          @(rtr_io.cb iff(rtr_io.cb.valido_n[pkt[0].da] == 0 ));
         end
 
         begin                              //this is another thread
@@ -134,11 +150,11 @@ program automatic test(router_io.TB rtr_io);
 
       for(int i=0; i<8; i=i)  
       begin 
-        if(!rtr_io.cb.valido_n[pkt.da])
-          datum[i++] = rtr_io.cb.dout[pkt.da];
+        if(!rtr_io.cb.valido_n[pkt[0].da])
+          datum[i++] = rtr_io.cb.dout[pkt[0].da];
 
-        if(rtr_io.cb.frameo_n[pkt.da])
-          if(i==8) 
+        if(rtr_io.cb.frameo_n[pkt[0].da])
+          if(i==8)
           begin          //byte alligned
             pkt2cmp_payload.push_back(datum);
             return;      //done with payload
@@ -154,6 +170,7 @@ program automatic test(router_io.TB rtr_io);
 
       pkt2cmp_payload.push_back(datum);
     end
+    $display($time, "ns : Get Pay load END.");
   endtask: get_payload
 
 endprogram: test

@@ -6,26 +6,24 @@ module router_test_top;
   bit            SystemClock = 0;
 
   router_io top_io(SystemClock);
-
-  test t(top_io);
+  test           t(top_io);
 
   initial 
   begin
 `ifdef VCS
-        if ($value$plusargs("vcdplusfile=%s", vcdplusfile))
-        begin
-            $vcdplusfile(vcdplusfile);
-            $vcdpluson(0);
-            $vcdplusmemon(0);
-        end
+    if ($value$plusargs("vcdplusfile=%s", vcdplusfile))
+    begin
+      $vcdplusfile(vcdplusfile);
+      $vcdpluson(0);
+      $vcdplusmemon(0);
+    end
 `else
-            $fdisplay(stderr, "Error: +vcdplusfile is VCS-only; use +vcdfile instead or recompile with VCS=1");
-            $fatal;
+    $fdisplay(stderr, "Error: +vcdplusfile is VCS-only; use +vcdfile instead or recompile with VCS=1");
+    $fatal;
 `endif
   end
 
   router dut(
-
     .reset_n	(top_io.reset_n),
     .clock		(top_io.clock),
     .din		  (top_io.din),
