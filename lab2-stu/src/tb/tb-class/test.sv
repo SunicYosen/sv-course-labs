@@ -4,43 +4,68 @@
 `include "Scoreboard.sv"
 
 program automatic test(router_io.TB rtr_io);
-  int run_for_n_packets = 2000; // number of packets to test
-  int run_times = 0;
-  int in_ports          = 16;
+  int PORTS_NUM         = 16;
+  int run_for_n_packets = 2000;     // number of packets to test
+  int run_times[];                  // process of each port
 
   logic [7:0] pkt2cmp_payload[$];   // actual packet data array
-  pkt_mbox    in_box;
-  Packet      pkt[];
-  Packet      pkt2cmp = new();         // Declare and construct two Packets pkt2send and pkt2cmp
-  Generator   gen[];                   // generator
+  pkt_mbox    in_box[];             // In box for each port
+  Packet      pkt[];                // Pkt get from gen to driver for each port.
+  Packet      pkt2cmp = new();      // Declare and construct two Packets pkt2send and pkt2cmp
+  
+  Generator   gen[];                // Generator for each port
+  Driver      driver[];             // Driver for each port
 
   initial 
   begin
-    gen = new[1];            // gen input ports Generator
-    foreach (gen[i]) gen[i] = new($sformatf("gen[%0d]", i), i); // new("gen[i]",i]
-    
-    pkt = new[in_ports];            // Input packets
+    run_times = new[PORTS_NUM];     // new
+    in_box    = new[PORTS_NUM];     // new
+    pkt       = new[PORTS_NUM];     // Input packets
+    gen       = new[PORTS_NUM];     // gen input ports Generator
+    driver    = new[PORTS_NUM];     // new
+
+    foreach (run_times[i]) run_times[i] = 0;
 
     reset();
-    gen[0].start();
-    repeat(run_for_n_packets)
+    foreach (gen[i])    gen[i] = new($sformatf("gen[%0d]", i), i);    // new("gen[i]",i]
+    foreach (gen[i])    gen[i].start();
+
+    foreach (driver[i]) driver[i] = new($sformatf("driver[%0d]", i), rtr_io, gen[i].out_box);
+    foreach (in_box[i]) in_box[i] = driver[i].out_box_to_check;
+    
+    foreach(driver[i])
     begin
-      $display("-------------------%4d/%4d-------------------", run_times+1, run_for_n_packets);
-      in_box = gen[0].out_box;
-      
-      for (int pkt_index = 0; pkt_index < in_ports; pkt_index ++)
-      begin
-        in_box.get(pkt[pkt_index]);
-        $display("sa= %2d, da= %2d",pkt[pkt_index].sa, pkt[pkt_index].da);
-      end
-
       fork
-        send();
-        recv();
-      join
+        automatic int port_i = i;
+        repeat(run_for_n_packets)
+        begin
+          $display("-------------------port%3d: %4d/%4d-------------------", port_i, run_times[port_i]+1, run_for_n_packets);
 
-      run_times ++;
+          begin
+            driver[port_i].get_packet();
+
+            fork
+              begin
+                driver[port_i].set_lock();
+                driver[port_i].packet_to_check();
+                driver[port_i].send();
+                driver[port_i].release_lock();
+              end
+
+              begin
+                in_box[port_i].get(pkt[port_i]);
+                recv();
+              end
+
+            join
+          end
+
+          run_times[port_i] ++;
+        end
+      join_none // non-blocking thread
     end
+
+    wait fork;  // wait for all forked threads in current scope to end
 
     repeat(10) @(rtr_io.cb);
 

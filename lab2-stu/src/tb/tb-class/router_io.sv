@@ -1,7 +1,7 @@
 `timescale 1ns/100ps
 
 interface router_io(input bit clock);
-  logic		reset_n;
+  logic		      reset_n;
   logic [15:0]	din;
   logic [15:0]	frame_n;
   logic [15:0]	valid_n;

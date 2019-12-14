@@ -4,7 +4,7 @@
 typedef mailbox #(Packet) pkt_mbox;
 
 class Generator;
-  int        run_for_n_packets = 33000;
+  int        run_for_n_packets = 32000; // >= Needed
   string     name;		            // unique identifier
   Packet     pkt2send;	          // stimulus Packet object
   pkt_mbox   out_box;	            // mailbox to Drivers
@@ -18,10 +18,10 @@ class Generator;
 endclass: Generator
 
 function Generator::new(string name, int port_id);
-  this.name                  = name;
-  this.pkt2send              = new();
-  this.out_box               = new(1);    // 2000-deep mailbox
-  this.port_id               = port_id;
+  this.name     = name;
+  this.pkt2send = new();
+  this.out_box  = new(1);    // 1-deep mailbox
+  this.port_id  = port_id;
 endfunction: new
 
 task Generator::gen();
