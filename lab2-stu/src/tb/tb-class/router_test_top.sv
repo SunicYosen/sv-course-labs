@@ -10,7 +10,7 @@ module router_test_top;
 
   initial 
   begin
-`ifdef VCS
+`ifdef VCS   // for get wave file
     if ($value$plusargs("vcdplusfile=%s", vcdplusfile))
     begin
       $vcdplusfile(vcdplusfile);
