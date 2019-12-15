@@ -55,19 +55,19 @@ function bit Packet::compare(Packet pkt2cmp, ref string message);
   //   set string argument with description of error
   //   terminate subroutine by returning a 0
   
-  if(payload.size() != pkt2cmp.payload.size()) 
+  if(this.payload.size() != pkt2cmp.payload.size()) 
   begin
     message = "Payload size Mismatch:\n";
-    message = { message, $sformatf("payload.size() = %0d, pkt2cmp.payload.size() = %0d\n", payload.size(), pkt2cmp.payload.size()) };
+    message = { message, $sformatf("payload.size() = %0d, pkt2cmp.payload.size() = %0d\n", this.payload.size(), pkt2cmp.payload.size()) };
     return (0);
   end
 
-  if(payload == pkt2cmp.payload) ;
+  if(this.payload == pkt2cmp.payload) ;
 
   else 
   begin
     message = "Payload Content Mismatch:\n";
-    message = { message, $sformatf("Packet Sent:   %p\nPkt Received:   %p", payload, pkt2cmp.payload) };
+    message = { message, $sformatf("Packet Sent:   %p\nPkt Received:   %p", this.payload, pkt2cmp.payload) };
     return (0);
   end
 

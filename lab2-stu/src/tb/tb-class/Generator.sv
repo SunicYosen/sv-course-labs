@@ -4,12 +4,12 @@
 typedef mailbox #(Packet) pkt_mbox;
 
 class Generator;
-  int        run_for_n_packets = 34000; // >= Needed
+  int        run_for_n_packets = 2000; // >= Needed
   string     name;		            // unique identifier
   Packet     pkt2send;	          // stimulus Packet object
   pkt_mbox   out_box;	            // mailbox to Drivers
   int        port_id = -1;        // port_id of connected Driver
-  static int pkts_generated = 0;  // packet count across all generators
+  int pkts_generated = 0;  // packet count across all generators
 
   extern         function new(string name = "Generator", int port_id);
   extern virtual task     gen();

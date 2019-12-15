@@ -17,6 +17,7 @@ program automatic test(router_io.TB rtr_io);
   Generator   gen[];                // Generator for each port
   Driver      driver[];             // Driver for each port
   Receiver    receiver[];           // Receiver for each output port
+  Scoreboard  scoreboard[];
 
   initial 
   begin
@@ -26,6 +27,7 @@ program automatic test(router_io.TB rtr_io);
     gen       = new[I_PORTS_NUM];     // gen input ports Generator
     driver    = new[I_PORTS_NUM];     // new
     receiver  = new[O_PORTS_NUM];     // new
+    scoreboard= new[O_PORTS_NUM];     // new
 
     foreach (run_times[i]) run_times[i] = 0;
 
@@ -37,6 +39,8 @@ program automatic test(router_io.TB rtr_io);
     foreach (in_box[i]) in_box[i] = driver[i].out_box_to_check;
     
     foreach (receiver[i]) receiver[i] = new($sformatf("receiver[%0d]", i), rtr_io, i);
+
+    foreach (scoreboard[i])  scoreboard[i] = new($sformatf("scoreboard[%0d]", i));
 
     foreach (driver[i])
     begin
@@ -59,7 +63,11 @@ program automatic test(router_io.TB rtr_io);
               
               begin
                 receiver[driver[port_i].pkt_from_gen.da].recv();
+                scoreboard[driver[port_i].pkt_from_gen.da].driver_mbox   = driver[port_i].out_box_to_check;
+                scoreboard[driver[port_i].pkt_from_gen.da].receiver_mbox = receiver[driver[port_i].pkt_from_gen.da].out_box_to_check;
+                scoreboard[driver[port_i].pkt_from_gen.da].check();
               end
+
             join
 
             driver[port_i].release_lock();
@@ -71,8 +79,8 @@ program automatic test(router_io.TB rtr_io);
       join_none // non-blocking thread
     end
 
-    // wait fork;  // wait for all forked threads in current scope to end
-
+    wait fork;  // wait for all forked threads in current scope to end
+    
     repeat(10) @(rtr_io.cb);
     $finish;
   end
