@@ -22,12 +22,12 @@ class Driver;
 endclass: Driver
 
 function Driver::new(string name, virtual router_io.TB rtr_io, pkt_mbox in_box);
-  this.name                = name;
-  this.rtr_io              = rtr_io;
-  this.pkt_from_gen        = new;
-  this.pkt_to_check        = new;
-  this.in_box              = in_box;
-  this.out_box_to_check    = new(32);
+  this.name                          = name;
+  this.rtr_io                        = rtr_io;
+  this.pkt_from_gen                  = new;
+  this.pkt_to_check                  = new;
+  this.in_box                        = in_box;
+  this.out_box_to_check              = new(3200);
   foreach(this.out_ports_semaphore[i]) this.out_ports_semaphore[i] = new(1);
 endfunction: new
 
@@ -49,13 +49,14 @@ task Driver::packet_to_check();
 endtask: packet_to_check
 
 task Driver::send();
+  $display($time, "ns : I %2d-->%2d -- S: ", this.pkt_from_gen.sa, this.pkt_from_gen.da, this.pkt_from_gen.payload);
   this.send_addrs();
   this.send_pad();
   this.send_payload();
 endtask: send
 
 task Driver::send_addrs();
-  $display($time, "ns : Send Addrs Start ...");
+  $display($time, "ns : I %2d -- Send Addrs Start ...", this.pkt_from_gen.sa);
   
   this.rtr_io.cb.frame_n[this.pkt_from_gen.sa] <= 1'b0;        // Start of packet
   
@@ -64,22 +65,22 @@ task Driver::send_addrs();
     this.rtr_io.cb.din[this.pkt_from_gen.sa] <= this.pkt_from_gen.da[i]; //i'th bit of da
     @(this.rtr_io.cb);
   end
-  $display($time, "ns : Send Addrs END.");
+  $display($time, "ns : I %2d -- Send Addrs END.", this.pkt_from_gen.sa);
 endtask: send_addrs
 
 task Driver::send_pad();
-  $display($time, "ns : Send Pad Start ...");
+  $display($time, "ns : I %2d -- Send Pad Start ...", this.pkt_from_gen.sa);
 
   this.rtr_io.cb.frame_n[this.pkt_from_gen.sa] <= 1'b0;
   this.rtr_io.cb.din[this.pkt_from_gen.sa]     <= 1'b1;
   this.rtr_io.cb.valid_n[this.pkt_from_gen.sa] <= 1'b1;
-  repeat(3) @(this.rtr_io.cb);
+  repeat(5) @(this.rtr_io.cb);
 
-  $display($time, "ns : Send Pad END.");
+  $display($time, "ns : I %2d -- Send Pad END.", this.pkt_from_gen.sa);
 endtask: send_pad
 
 task Driver::send_payload();
-  $display($time, "ns : Send Payload Start ...");
+  $display($time, "ns : I %2d -- Send Payload Start ...", this.pkt_from_gen.sa);
 
   foreach(this.pkt_from_gen.payload[index])
   begin
@@ -94,7 +95,7 @@ task Driver::send_payload();
 
   this.rtr_io.cb.valid_n[this.pkt_from_gen.sa] <= 1'b1;
 
-  $display($time, "ns : Send Payload END.");
+  $display($time, "ns : I %2d -- Send Payload END.", this.pkt_from_gen.sa);
   
 endtask: send_payload
 

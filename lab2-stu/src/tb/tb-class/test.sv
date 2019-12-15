@@ -4,7 +4,8 @@
 `include "Scoreboard.sv"
 
 program automatic test(router_io.TB rtr_io);
-  int PORTS_NUM         = 16;
+  int I_PORTS_NUM       = 16;
+  int O_PORTS_NUM       = 16;
   int run_for_n_packets = 2000;     // number of packets to test
   int run_times[];                  // process of each port
 
@@ -15,14 +16,16 @@ program automatic test(router_io.TB rtr_io);
   
   Generator   gen[];                // Generator for each port
   Driver      driver[];             // Driver for each port
+  Receiver    receiver[];           // Receiver for each output port
 
   initial 
   begin
-    run_times = new[PORTS_NUM];     // new
-    in_box    = new[PORTS_NUM];     // new
-    pkt       = new[PORTS_NUM];     // Input packets
-    gen       = new[PORTS_NUM];     // gen input ports Generator
-    driver    = new[PORTS_NUM];     // new
+    run_times = new[I_PORTS_NUM];     // new
+    in_box    = new[I_PORTS_NUM];     // new
+    pkt       = new[I_PORTS_NUM];     // Input packets
+    gen       = new[I_PORTS_NUM];     // gen input ports Generator
+    driver    = new[I_PORTS_NUM];     // new
+    receiver  = new[O_PORTS_NUM];     // new
 
     foreach (run_times[i]) run_times[i] = 0;
 
@@ -33,7 +36,9 @@ program automatic test(router_io.TB rtr_io);
     foreach (driver[i]) driver[i] = new($sformatf("driver[%0d]", i), rtr_io, gen[i].out_box);
     foreach (in_box[i]) in_box[i] = driver[i].out_box_to_check;
     
-    foreach(driver[i])
+    foreach (receiver[i]) receiver[i] = new($sformatf("receiver[%0d]", i), rtr_io, i);
+
+    foreach (driver[i])
     begin
       fork
         automatic int port_i = i;
@@ -43,32 +48,32 @@ program automatic test(router_io.TB rtr_io);
 
           begin
             driver[port_i].get_packet();
-
+            driver[port_i].set_lock();
+            
             fork
               begin
-                driver[port_i].set_lock();
+                $display("From %2d To %2d", driver[port_i].pkt_from_gen.sa, driver[port_i].pkt_from_gen.da);
                 driver[port_i].packet_to_check();
                 driver[port_i].send();
-                driver[port_i].release_lock();
               end
-
+              
               begin
-                in_box[port_i].get(pkt[port_i]);
-                recv();
+                receiver[driver[port_i].pkt_from_gen.da].recv();
               end
-
             join
+
+            driver[port_i].release_lock();
           end
 
           run_times[port_i] ++;
         end
+
       join_none // non-blocking thread
     end
 
-    wait fork;  // wait for all forked threads in current scope to end
+    // wait fork;  // wait for all forked threads in current scope to end
 
     repeat(10) @(rtr_io.cb);
-
     $finish;
   end
   
@@ -86,6 +91,8 @@ program automatic test(router_io.TB rtr_io);
     $display($time, "ns : Reset END.");
   endtask: reset
 
+
+/*
   task send();
     send_addrs();
     send_pad();
@@ -197,5 +204,6 @@ program automatic test(router_io.TB rtr_io);
     end
     $display($time, "ns : Get Pay load END.");
   endtask: get_payload
+*/
 
 endprogram: test

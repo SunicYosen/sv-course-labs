@@ -4,7 +4,7 @@
 typedef mailbox #(Packet) pkt_mbox;
 
 class Generator;
-  int        run_for_n_packets = 32000; // >= Needed
+  int        run_for_n_packets = 34000; // >= Needed
   string     name;		            // unique identifier
   Packet     pkt2send;	          // stimulus Packet object
   pkt_mbox   out_box;	            // mailbox to Drivers
