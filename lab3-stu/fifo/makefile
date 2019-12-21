@@ -21,6 +21,7 @@ TOP_NAME = fifo_tb
 VPD_FILE  = $(LOG_DIR)/$(TOP_NAME).vpd
 FSDB_FILE = $(LOG_DIR)/$(TOP_NAME).fsdb
 LOG_FILE := $(LOG_DIR)/$(TOP_NAME).log
+ASSERTION_REPORT = $(LOG_DIR)/$(TOP_NAME)_assertion.dat
 # LOG_FILE := $(LOG_DIR)/run_`date +%y%m%d%02k%M`.log
 
 VCS = vcs
@@ -45,7 +46,7 @@ VCS_OPTS += -P ${VERDI_HOME}/share/PLI/VCS/LINUXAMD64/novas.tab \
 # Run
 RUN_FLAGS = +vcdplusfile=$(VPD_FILE) \
             +fsdbfile=$(FSDB_FILE)   \
-            -assert
+            -assert report=$(ASSERTION_REPORT)
 
 BIN = $(BIN_DIR)/$(TOP_NAME).vsim
 
