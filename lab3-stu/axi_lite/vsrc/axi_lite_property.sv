@@ -12,7 +12,7 @@ module axi_lite_property (
     input logic            awready,
     input logic    [31:0]  wdata,
     input logic    [3:0]   wstrb,
-    input logic            wvalid
+    input logic            wvalid,
     input logic            wready,
     input logic    [1:0]   bresp,
     input logic            bvalid,
