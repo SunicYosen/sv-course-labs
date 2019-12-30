@@ -35,15 +35,15 @@ module fifo_property(input logic        clock,
                    else   $display($time, "ns : FAIL::check_reset!\n");
   `endif  // check reset
 
-  `ifdef CHECK_EMPTY
+  `ifdef CHECK_EMPTY  // Check empty according to read address and write address
     property check_empty;
-      @(posedge clock) disable iff(!reset_n) ((`rd_addr == `wr_addr) |-> (fifo_empty == 1));
+      @(posedge clock) disable iff(!reset_n) ((`rd_addr == `wr_addr) |-> (fifo_empty == 1)); 
     endproperty
     check_empty_p: assert property (check_empty) 
                    else $display($time, "ns : FAIL::check_empty condition!\n");
   `endif // check empty
 
-  `ifdef CHECK_FULL
+  `ifdef CHECK_FULL  // Check Full according to data_remain
     property check_full;
       @(posedge clock) disable iff(!reset_n) (((`data_remain[FIFO_ADDR_WIDTH]!= 1'b1) 
                                            &  ((`data_remain[FIFO_ADDR_WIDTH-1: 3]) 
@@ -54,7 +54,7 @@ module fifo_property(input logic        clock,
                   else $display($time, "ns : FAIL::check_full condition!\n");
   `endif // check full
 
-  `ifdef CHECK_OVERFLOW
+  `ifdef CHECK_OVERFLOW  // Check Overflow according to full&write or empty&read
     property check_overflow;
       @(posedge clock) disable iff(!reset_n) (((fifo_write & fifo_full) 
                                             || (fifo_read  & fifo_empty))
@@ -62,6 +62,15 @@ module fifo_property(input logic        clock,
     endproperty
     check_overflow_p: assert property (check_overflow)
                       else $display($time, "ns : FAIL::check_overflow condition!\n");
+  `endif // check overflow
+
+  `ifdef CHECK_VALID_OUT  // Check valid out according to data remain
+    property check_validout;
+      @(posedge clock) disable iff(!reset_n) (`data_remain >= 4 && fifo_read 
+                                                          |-> ##1 fifo_valid_out);
+    endproperty
+    check_validout_p: assert property (check_validout)
+                      else $display($time, "ns : FAIL::check_validout condition!\n");
   `endif // check overflow
 
 endmodule
