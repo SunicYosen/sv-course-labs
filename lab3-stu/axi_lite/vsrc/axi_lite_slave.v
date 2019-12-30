@@ -125,6 +125,8 @@
 	// de-asserted when reset is low.
 	// always @( posedge S_AXI_ACLK )
 	// begin 
+
+	// Change by for no delay
 	assign	S_AXI_RVALID	= axi_rvalid;
 	assign	S_AXI_BVALID	= axi_bvalid;   
 	assign	S_AXI_AWREADY	= axi_awready;  //
@@ -424,7 +426,7 @@
 	// Implement memory mapped register select and read logic generation
 	// Slave register read enable is asserted when valid address is available
 	// and the slave is ready to accept the read address.
-	assign slv_reg_rden = axi_arready & S_AXI_ARVALID;
+	assign slv_reg_rden = axi_arready & S_AXI_ARVALID;  // Change for correcting error control
 	always @(*)
 	begin
 	      // Address decoding for reading registers

@@ -30,7 +30,8 @@ input logic            rready);
 
 // Write
 // Check awvalid
-property check_awvalid;  
+property check_awvalid; 
+    // awvalid enable when awready rose and it will be disable at next cycle
     @(posedge clk) disable iff(!reset_n) $rose(awready) |-> awvalid ##1 $fell(awvalid);
 endproperty
 
@@ -39,6 +40,8 @@ check_awvalid_p: assert property (check_awvalid)
 
 // Check awready
 property check_awready;  
+    // awready enable when ~awready && wvalid && awvalid 
+    // and it will be disable at next cycle
     @(posedge clk) disable iff(!reset_n) (~awready && wvalid && awvalid) |-> ##1 awready ##1 ~awready;
 endproperty
 
@@ -47,6 +50,7 @@ check_awready_p: assert property (check_awready)
 
 // Check wvalid
 property check_wvalid;  
+    // wvalid fell after (wready && wvalid)
     @(posedge clk) disable iff(!reset_n) (wready && wvalid) |-> ##1 $fell(wvalid);
 endproperty
 
@@ -55,7 +59,8 @@ check_wvalid_p: assert property (check_wvalid)
 
 
 // Check wready
-property check_wready;  
+property check_wready; 
+    // wready hold 1 cycle
     @(posedge clk) disable iff(!reset_n) $rose(wready) |-> ##1 $fell(wready);
 endproperty
 
@@ -64,6 +69,7 @@ check_wready_p: assert property (check_wready)
 
 // Check bresp 
 property check_bresp;
+    // bresp
     @(posedge clk) disable iff(!reset_n)  (awready && awvalid && wready && wvalid && ~bvalid) |-> (bresp==2'b00) ##1 (bresp==2'b00);
 endproperty
 
@@ -72,6 +78,7 @@ check_bresp_p: assert property (check_bresp)
 
 // Check bvalid
 property check_bvalid;
+    // bvalid
     @(posedge clk) disable iff(!reset_n) (awready && awvalid && wready && wvalid && ~bvalid) |-> ##1 bvalid;
 endproperty
 
