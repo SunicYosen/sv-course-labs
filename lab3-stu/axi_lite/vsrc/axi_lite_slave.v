@@ -34,7 +34,7 @@
 		input wire  S_AXI_AWVALID,
 		// Write address ready. This signal indicates that the slave is ready
     		// to accept an address and associated control signals.
-		output reg  S_AXI_AWREADY,
+		output wire  S_AXI_AWREADY,
 		// Write data (issued by master, acceped by Slave) 
 		input wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_WDATA,
 		// Write strobes. This signal indicates which byte lanes hold
@@ -46,13 +46,13 @@
 		input wire  S_AXI_WVALID,
 		// Write ready. This signal indicates that the slave
     		// can accept the write data.
-		output reg  S_AXI_WREADY,
+		output wire  S_AXI_WREADY,
 		// Write response. This signal indicates the status
     		// of the write transaction.
-		output reg [1 : 0] S_AXI_BRESP,
+		output wire [1 : 0] S_AXI_BRESP,
 		// Write response valid. This signal indicates that the channel
     		// is signaling a valid write response.
-		output reg  S_AXI_BVALID,
+		output wire  S_AXI_BVALID,
 		// Response ready. This signal indicates that the master
     		// can accept a write response.
 		input wire  S_AXI_BREADY,
@@ -67,15 +67,15 @@
 		input wire  S_AXI_ARVALID,
 		// Read address ready. This signal indicates that the slave is
     		// ready to accept an address and associated control signals.
-		output reg  S_AXI_ARREADY,
+		output wire  S_AXI_ARREADY,
 		// Read data (issued by slave)
 		output wire [C_S_AXI_DATA_WIDTH-1 : 0] S_AXI_RDATA,
 		// Read response. This signal indicates the status of the
     		// read transfer.
-		output reg [1 : 0] S_AXI_RRESP,
+		output wire [1 : 0] S_AXI_RRESP,
 		// Read valid. This signal indicates that the channel is
     		// signaling the required read data.
-		output reg  S_AXI_RVALID,
+		output wire  S_AXI_RVALID,
 		// Read ready. This signal indicates that the master can
     		// accept the read data and response information.
 		input wire  S_AXI_RREADY
@@ -123,16 +123,16 @@
 	// axi_awready is asserted for one S_AXI_ACLK clock cycle when both
 	// S_AXI_AWVALID and S_AXI_WVALID are asserted. axi_awready is
 	// de-asserted when reset is low.
-	always @( posedge S_AXI_ACLK )
-	begin 
-		S_AXI_RVALID	= axi_rvalid;
-		S_AXI_BVALID	= axi_bvalid;
-		S_AXI_AWREADY	= axi_awready;
-		S_AXI_WREADY	= axi_wready;
-	    S_AXI_BRESP	    = axi_bresp;
-		S_AXI_ARREADY	= axi_arready;
-		S_AXI_RRESP	= axi_rresp;
-	end
+	// always @( posedge S_AXI_ACLK )
+	// begin 
+	assign	S_AXI_RVALID	= axi_rvalid;
+	assign	S_AXI_BVALID	= axi_bvalid;   
+	assign	S_AXI_AWREADY	= axi_awready;  //
+	assign	S_AXI_WREADY	= axi_wready;   //
+	assign  S_AXI_BRESP	    = axi_bresp;    //
+	assign	S_AXI_ARREADY	= axi_arready;
+	assign	S_AXI_RRESP	    = axi_rresp;
+	// end
 
 	always @( posedge S_AXI_ACLK )
 	begin
@@ -424,7 +424,7 @@
 	// Implement memory mapped register select and read logic generation
 	// Slave register read enable is asserted when valid address is available
 	// and the slave is ready to accept the read address.
-	assign slv_reg_rden = axi_arready & S_AXI_ARVALID & axi_rvalid;
+	assign slv_reg_rden = axi_arready & S_AXI_ARVALID;
 	always @(*)
 	begin
 	      // Address decoding for reading registers
