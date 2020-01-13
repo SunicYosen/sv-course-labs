@@ -1,0 +1,48 @@
+`include "data_defs.v"
+module ALU  (   	clock, reset, aluin1, aluin2, opselect, operation, 
+					enable_arith, enable_shift, 
+                    shift_number, aluout, carry
+                );
+
+
+    parameter   instr_wd  	=   `INSTR_WIDTH;
+    parameter   reg_wd    	=   `REGISTER_WIDTH;
+    parameter   imm_wd    	=   `IMMEDIATE_WIDTH;
+
+    input 					            clock, reset;
+	input  	 		[reg_wd -1:0]       aluin1, aluin2; 
+	input	        [2:0]			    opselect;
+	input	        [2:0]               operation;	
+	input           [4:0]          		shift_number;
+    input                            	enable_shift, enable_arith;
+	
+	output	 		[reg_wd -1:0]		aluout;
+	output								carry;
+	
+	wire      		[reg_wd -1:0]       aluout_shift;
+	wire      		[reg_wd:0]       	aluout_arith;
+	reg									enable_arith_del;
+	
+    Arith_ALU Arith     (   
+                            .clock(clock), .reset(reset), .enable(enable_arith),
+                            .aluin1(aluin1), .aluin2(aluin2), 
+                            .aluoperation(operation), .aluopselect(opselect), 
+                            .aluout(aluout_arith)  
+                            );
+
+    
+	Shift_ALU Shifter     (   
+                            .clock(clock), .reset(reset), .enable(enable_shift),
+                            .in(aluin1), .shift(shift_number), 
+                            .shift_operation(operation), .aluout(aluout_shift)  
+                            );
+`protected 
+    MTI!#b\VeW*72_<T[]2}]u^#]H\w3~TnuE~T1i]3!xN9iHu$Hsi=E>VB}1p,kaGA-'?xV=;[G=1m
+    72@zjRiTismBTY^3+1?v[kD']5kuD-5\{-;[i=3*?p^in]X\{C37D}nEs2O~yD^p}{>jmbDX~O!E
+    QElwYl;>xY@jinYn3ZCr-Y5=#+kU2H5sAx_,V\'CxG8,$D[D2\jD{xewSB~lDeoOs3&!'jn7,YvR
+    iGrI#pk[_O1?]>~rkD3sO2{k-,^lh$XG~,^;]7gAs,7rXUr[KYoJ\u}1~vA}+G-7eQ}V'#2lBB'C
+    w2'f#a,f}HH>1^o_nji'XoeTUTZ7I>oDjF=@av{G>;W<
+`endprotected
+   
+	
+endmodule

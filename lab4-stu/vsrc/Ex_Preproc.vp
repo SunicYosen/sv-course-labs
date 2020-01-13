@@ -1,0 +1,69 @@
+// `include "data_defs.v"
+module Ex_Preproc  (   clock, reset, enable_ex, src1, src2, imm, control_in, 
+                    mem_data_read_in, mem_data_write_out, mem_write_en, 
+					aluin1, aluin2, opselect_out, operation_out, shift_number, 
+					enable_shift, enable_arith
+                );
+
+    parameter   instr_wd  	=   `INSTR_WIDTH;
+    parameter   reg_wd    	=   `REGISTER_WIDTH;
+    parameter   imm_wd    	=   `IMMEDIATE_WIDTH;
+
+    input 					            clock, reset, enable_ex;
+	input  	 		[reg_wd -1:0]       src1, src2; 
+	input 	 		[reg_wd -1:0]       imm;
+	input 		    [6:0]			    control_in;
+    // the data that was read in the Decode stage
+	input	 		[reg_wd	-1:0]		mem_data_read_in; 
+    // data that is going to be written to the memory 
+	output  	    [reg_wd -1:0]       mem_data_write_out; 
+    // enable for writing to memory   
+	output  	 	[reg_wd -1:0]  		aluin1, aluin2; 
+	output	        [2:0]			    operation_out;
+	output	        [2:0]               opselect_out;	
+	output          [4:0]          		shift_number;
+    output                            	enable_shift, enable_arith;
+	
+    output					            mem_write_en;  
+
+	// Intermediate Signals
+	reg					                mem_write_en;
+	
+	reg  	 		[reg_wd -1:0]  		aluin1, aluin2; 
+	reg 	        [2:0]			    opselect_out;
+	reg 	        [2:0]               operation_out;	
+	
+	wire	        [2:0]			    opselect;
+	wire				                immp_regn_op;
+	wire 	        [2:0]               operation;	
+
+    reg          	[4:0]            	shift_number;
+	
+    reg                                 enable_shift, enable_arith;
+	
+	assign	{operation, immp_regn_op,opselect} = control_in;
+    // control[2:0] = opselect: selects type of operand to be used i.e. memory, register or immediate
+    // control[3]  = immp_regn_op: 1=> immediate operation & 0: register operation
+    // control[6:4] =  operation: selects type of operation to be performed i.e. arithmetic, shifting etc 
+    
+`protected 
+    MTI!#iU5$tWGZZN<Die]aH7?_~l'{zXvOE'~5#U{,[[fYK${7Dk}RQ_K'+1*%RQ?Q27Y@S"oul!]
+    zpVB{X!$Ajr@'lRY+{Ku$X*$H\Ev+!OYC}zb~_OT7rZ_oO!;\!Iw=fRGiT],wWce3V?VCl;y=#r@
+    |@5nkl,{7sOTs>nrB-Ue7UpoGv-RAWwGlwwZXx=JRn$KzR5GT?<!r53E<l*aO0*A<BXYuZz#aJ{[
+    pi*vs[pxzI=t1,7ib:*Xa'K+^oF~I#Q[?j}?$!#e!!Z:9#'~nIYX!T$Jss*Aj"U>@CF*zeA_WoKT
+    r{-]z'\lOin,X1Z[{*KR?IO=zoz@<N!Iu1mj3oO,TJbEjDiTa}=yQ5^1]{t5kopemlwAH1Hws#BY
+    x+BBB;_g)DO-;^In={Uovellr>,W[R-3ZZV^i[TN{TED]3R>ew*e=~KHs@Wj4HTo~G?!VQ@75oow
+    }Dv~@7wQD'G~;zEXUj*G#zOvlNliJ1BAuuQC~3Hp^p7H*1TppOe<Zv$sI[#YB2qvQ<kyIQ@@m=]T
+    $Y-G]]Y~CBC-w-oae;XYX]^xYmXe\Ql?/6l>{A}>oAMk5K*?r\KwaCBkHn>LoZKvz~+<WD3Wv_E]
+    ,_CB1O+Z&qwY'Oil$A_u[E!=HvDr;?i9j2j{_kpx,1H\^1x2#*}i=SA=xXt|m[[WI3UaOv+Wh{U@
+    *o,IKBA>;B+3]^,sixArC=_eu]BkKO!{AGH7l1+j^QG5DTVW@;Hpik+jKZX\u+<-}<eT^AVaGG#J
+    u[+B@_eJ>EiGELrDET<e['Q3OT-Y]w[Yp1X-}])w^e2G=Q1i_x[-weR>eoe]+zKF}*Q3v,>J?}VH
+    ^\@;*'j>x+a2}+RQnC>7oV@rkVzp[-~YR}?a0{V<_+Avzp#o3{+m[4;l3DQ]\\$LvprE_+!**6>*
+    n@^'nD!$IZSQQg[{^2*Ou'aB3~rQ{!+7355I-Tpe?GCl^Cu1Onn1m~?,RVE}1B}o@mB11k#I3VQD
+    JT5]55rZoOsGA}j~Y^HTeE5?^rAEr7=$XBkjE-BJz$#apIg\~pxXI{]^\z_]plC5qB;^oQ{QmzOO
+    -_m,[IRHK5G=^kGGH[^,k=uIJ!n5i^ZsJzHIZ$xQzk+]Q~DWBpsp}}[?,{141|ip^{*>Gwura1'Y
+    KQ}m,?{EXehIpx{TRIxf8eKU=g}p{Hn-~o;}Y^*s_ApADx_^am[7]m'zWYVZZV1'\sZ,3UYCeB{]
+    B#]?^iR}r~_@RH_go,Xo+^VHVA_O9D>HjD]r}2n^OvKQidmwjH}W<~z*+IvZ}
+`endprotected
+   
+endmodule
