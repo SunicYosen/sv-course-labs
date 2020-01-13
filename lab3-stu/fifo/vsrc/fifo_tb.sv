@@ -50,22 +50,23 @@ initial // Test signals status after reset(full empty overflow)
 begin
 `ifdef VCS
         if ($value$plusargs("vcdplusfile=%s", vcdplusfile))
-        begin
+          begin
             $vcdplusfile(vcdplusfile);
             $vcdpluson(0);
             $vcdplusmemon(0);
-        end
+          end
+          
+        // FSDB
+        if ($value$plusargs("fsdbfile=%s", fsdbfile))
+          begin
+            $fsdbDumpfile(fsdbfile);
+            $fsdbDumpvars(0);
+            $fsdbDumpon(0);
+          end
 `else
             $fdisplay(stderr, "Error: +vcdplusfile is VCS-only; use +vcdfile instead or recompile with VCS=1");
             $fatal;
 `endif
-  // FSDB
-  // if ($value$plusargs("fsdbfile=%s", fsdbfile))
-  //   begin
-  //     $fsdbDumpfile(fsdbfile);
-  //     $fsdbDumpvars(0);
-  //     $fsdbDumpon(0);
-  //   end
 
   // Reset
   fifo_reset;

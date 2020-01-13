@@ -78,4 +78,4 @@ dve: $(VPD_FILE)
 
 .PHONY: clean
 clean:
-	rm -rf $(BIN) $(BIN).daidir $(LOG_FILE) $(LOG_DIR) $(BIN_DIR) ucli.key csrc DVEfiles novas* verdiLog 
+	rm -rf $(BIN) $(BIN).daidir $(LOG_FILE) $(LOG_DIR) $(BIN_DIR) ucli.key csrc DVEfiles novas* verdiLog *.fsdb*
