@@ -11,7 +11,7 @@ program Execute_test(Execute_io.TB Execute, DUT_probe_if Prober);
 	int 	number_packets;
 	
 	initial begin
-		number_packets =1000;
+		number_packets = 40000;
         generator = new("Generator", number_packets);
 		sb = new(); // NOTE THAT THERE ARE DEFAULT VALUES FOR THE NEW FUNCTION 
 					// FOR THE SCOREBOARD 

@@ -13,11 +13,10 @@ class Packet;
 	
 	constraint Limit {
 
-		src1 inside	{[0:65534]};
- 		src2 inside 	{[0:65534]};
-		imm  inside	{[0:65534]};
-		mem_data inside	{[0:65534]};
-			
+		src1 inside	{[0:(1<<`REGISTER_WIDTH)-1]};
+ 		src2 inside {[0:(1<<`REGISTER_WIDTH)-1]};
+		imm  inside	{[0:(1<<`REGISTER_WIDTH)-1]};
+		mem_data inside	{[0:(1<<`REGISTER_WIDTH)-1]};
 		
 		opselect_gen inside {[0:1],[4:5]};	//These are the only valid inputs 
 	//	opselect_gen inside {[1:1]};	//Arith only 

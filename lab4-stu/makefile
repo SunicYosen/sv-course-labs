@@ -39,7 +39,7 @@ compile: $(VSRC_VP) $(VSRC_FILE)
 	vlog -l $(BUILD_DIR)/compile.log -mfcu -sv $(VSRC_FILE)
 
 simulate:
-	vsim -l $(BUILD_DIR)/run.log -coverage Execute_test_top -do "run 2000"
+	vsim -l $(BUILD_DIR)/run.log -coverage Execute_test_top -do "run 80000"
 
 # gui:
 # 	vsim -coverage Execute_test_top -do "run 2000"

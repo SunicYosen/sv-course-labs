@@ -62,9 +62,9 @@ class Scoreboard;
 		coverpoint  pkt_sent.src2;
 		src1_cov: coverpoint pkt_sent.src1 {
 					bins zero = {0};
-					bins allfs = {32'hffffffff};
-					bins special1 = {32'h55555555};
-					bins special2 = {32'haaaaaaaa};
+					// bins allfs = {32'hffffffff};
+					// bins special1 = {32'h55555555};
+					// bins special2 = {32'haaaaaaaa};
 					bins positive = {[0:'1]} iff(pkt_sent.src1[31] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_sent.src1[31] == 1'b1);
 //					wildcard bins positive = {32'b0???????????????????????????????};
@@ -72,9 +72,9 @@ class Scoreboard;
 		}
 		src2_cov: coverpoint pkt_sent.src2 {
 					bins zero = {0};
-					bins allfs = {32'hffffffff};
-					bins special1 = {32'h55555555};
-					bins special2 = {32'haaaaaaaa};
+					// bins allfs = {32'hffffffff};
+					// bins special1 = {32'h55555555};
+					// bins special2 = {32'haaaaaaaa};
 					bins positive = {[0:'1]} iff(pkt_sent.src2[31] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_sent.src2[31] == 1'b1);
 //					wildcard bins positive = {32'b0???????????????????????????????};
@@ -91,14 +91,14 @@ class Scoreboard;
 		cross src1_cov, src2_cov, opn_cov; 
 		// coverage to ensure that an add with some corner cases has taken place
 		addition_cov: cross src1_cov, src2_cov, opselect_cov, opn_cov {
-			bins addfs = 	binsof(src1_cov.allfs) && binsof(src2_cov.allfs) && 
-							binsof(opselect_cov.arith) && 
-							binsof(opn_cov) intersect {0};
-			
-			bins addspec =  binsof(src1_cov.special1) && binsof(src2_cov.special2) && 
-							binsof(opselect_cov.arith) && 
-							binsof(opn_cov) intersect {0};
-
+			// bins addfs = 	binsof(src1_cov.allfs) && binsof(src2_cov.allfs) && 
+			// 				binsof(opselect_cov.arith) && 
+			// 				binsof(opn_cov) intersect {0};
+			// 
+			// bins addspec =  binsof(src1_cov.special1) && binsof(src2_cov.special2) && 
+			// 				binsof(opselect_cov.arith) && 
+			// 				binsof(opn_cov) intersect {0};
+// 
 
 			bins addpos =  	binsof(src1_cov.positive) && binsof(src2_cov.positive) && 
 							binsof(opselect_cov.arith) && 
@@ -143,21 +143,25 @@ class Scoreboard;
 					bins arith =  binsof(opselect_cov.arith) && binsof(opn_cov);
 					bins mem_read =  binsof(opselect_cov.mem_read) && binsof(opn_cov) intersect {0,1,3,4,5};
 					bins mem_write =  binsof(opselect_cov.mem_write) && binsof(opn_cov);
+					ignore_bins shift_ignore    = binsof(opselect_cov.shift) && binsof(opn_cov) intersect {4,5,6,7};
+					ignore_bins mem_read_ignore = binsof(opselect_cov.mem_read) && binsof(opn_cov) intersect {2,6,7};
 				 }		
 				
 
 		cx_opword_cov: cross opselect_cov,opn_cov,imm_gen_cov{	// to check cross coverage with all operations/opselects along with 
-									////immediate mode
-				
-					
+									                            ////immediate mode					
 					bins shift = binsof(opselect_cov.shift) && binsof(opn_cov) intersect {0,1,2,3} && binsof(imm_gen_cov);
 					bins arith =  binsof(opselect_cov.arith) && binsof(opn_cov) && binsof(imm_gen_cov);
 					bins mem_read =  binsof(opselect_cov.mem_read) && binsof(opn_cov) intersect {0,1,3,4,5 } && binsof(imm_gen_cov) intersect {1} ;
 					bins mem_write =  binsof(opselect_cov.mem_write) && binsof(opn_cov)&& binsof(imm_gen_cov);
+					ignore_bins shift_ignore = binsof(opselect_cov.shift) && binsof(opn_cov) intersect {4,5,6,7} && binsof(imm_gen_cov);
+					ignore_bins mem_read_ignore = binsof(opselect_cov.mem_read) && binsof(opn_cov) intersect {5,6,7} && binsof(imm_gen_cov);
 		}
 
 		cx_imm_shift_cov:cross opselect_cov,imm_shift_cov,opn_cov{
-					bins imm_shift=	binsof(imm_shift_cov) && binsof(opselect_cov.shift) && binsof(opn_cov) intersect {0,1,2,3};
+			        ignore_bins arith_ignore         = binsof(opselect_cov.arith) && binsof(opn_cov) && binsof(imm_shift_cov);
+					ignore_bins imm_shift_ignore     = binsof(imm_shift_cov) && binsof(opselect_cov.shift) && binsof(opn_cov) intersect {4,5,6,7};
+					bins imm_shift                   = binsof(imm_shift_cov) && binsof(opselect_cov.shift) && binsof(opn_cov) intersect {0,1,2,3};
 		}
 
 	endgroup
@@ -177,14 +181,12 @@ class Scoreboard;
 		oprtn_cov: coverpoint pkt_cmp.operation;
 
 		cx_opword_cov: cross opsel_cov,oprtn_cov{	// to check cross coverage with all operations/opselects
-								
-				
-					
 					bins shift = binsof(opsel_cov.shift) && binsof(oprtn_cov) intersect {0,1,2,3};
 					bins arith =  binsof(opsel_cov.arith) && binsof(oprtn_cov) ;
 					bins mem_read =  binsof(opsel_cov.mem_read) && binsof(oprtn_cov) intersect {0,1,3,4,5};
 					bins mem_write =  binsof(opsel_cov.mem_write) && binsof(oprtn_cov);
-
+					ignore_bins shift_ignore = binsof(opsel_cov.shift) && binsof(oprtn_cov) intersect {4,5,6,7};
+					ignore_bins mem_read_ignore = binsof(opsel_cov.mem_read) && binsof(oprtn_cov) intersect {2,6,7};
 		}
 
 
@@ -199,7 +201,7 @@ class Scoreboard;
         covergroup Arith_Cov; 
 
 		// ip side enable	
-	       dev_en_cov:coverpoint  pkt_sent.enable;
+	    dev_en_cov:coverpoint  pkt_sent.enable;
 
 
 		// Intermediate ips for enable
@@ -212,21 +214,21 @@ class Scoreboard;
 		
 		aluin1_cov: coverpoint pkt_cmp.aluin1 {
 					bins zero = {0};
-					bins allfs = {32'hffffffff};
-					bins special1 = {32'h55555555};
-					bins special2 = {32'haaaaaaaa};
+					// bins allfs = {32'hffffffff};
+					// bins special1 = {32'h55555555};
+					// bins special2 = {32'haaaaaaaa};
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b1);
-//					wildcard bins positive = {32'b0???????????????????????????????};
-//					wildcard bins negative = {32'b1???????????????????????????????};
+					// wildcard bins positive = {32'b0???????????????????????????????};
+					// wildcard bins negative = {32'b1???????????????????????????????};
 		}
 
 		//alu2
 		aluin2_cov: coverpoint pkt_cmp.aluin2 {
 					bins zero = {0};
-					bins allfs = {32'hffffffff};
-					bins special1 = {32'h55555555};
-					bins special2 = {32'haaaaaaaa};
+					// bins allfs = {32'hffffffff};
+					// bins special1 = {32'h55555555};
+					// bins special2 = {32'haaaaaaaa};
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin2[31] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin2[31] == 1'b1);
 //					wildcard bins positive = {32'b0???????????????????????????????};
@@ -236,9 +238,9 @@ class Scoreboard;
 //		half aluin1
 		h_aluin1_cov: coverpoint pkt_cmp.aluin1 {
 					bins zero = {[0:'1]} iff ((pkt_cmp.aluin1[15:0] == 16'h0000));
-					bins allfs = {[0:'1]} iff ((pkt_cmp.aluin1[15:0] == 16'hffff));
-					bins special1 = {[0:'1]} iff ((pkt_cmp.aluin1[15:0] == 16'h5555));
-				        bins special2 = {[0:'1]} iff ((pkt_cmp.aluin1[15:0] == 16'haaaa));
+					// bins allfs = {[0:'1]} iff ((pkt_cmp.aluin1[15:0] == 16'hffff));
+					// bins special1 = {[0:'1]} iff ((pkt_cmp.aluin1[15:0] == 16'h5555));
+				    // bins special2 = {[0:'1]} iff ((pkt_cmp.aluin1[15:0] == 16'haaaa));
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin1[15] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin1[15] == 1'b1);
 //					wildcard bins positive = {32'b0???????????????????????????????};
@@ -249,9 +251,9 @@ class Scoreboard;
 		//half aluin2
 		h_aluin2_cov: coverpoint pkt_cmp.aluin2 {
 					bins zero = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'h0000));
-					bins allfs = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'hffff));
-					bins special1 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'h5555));
-				        bins special2 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'haaaa));
+					// bins allfs = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'hffff));
+					// bins special1 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'h5555));
+				    // bins special2 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'haaaa));
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin2[15] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin2[15] == 1'b1);
 //					wildcard bins positive = {32'b0???????????????????????????????};
@@ -276,28 +278,61 @@ class Scoreboard;
 		// check coverage for addition  operations
 		add_cov: cross aluin1_cov, aluin2_cov, opsel_cov, oprtn_cov,carry_cov,en_arith_cov
 		       {
-			bins add_ffs = 	binsof(aluin1_cov.allfs) && binsof(aluin2_cov.allfs) && 
-							binsof(opsel_cov) && 
-							binsof(oprtn_cov) intersect {0} &&
-							binsof(en_arith_cov) intersect{1};
-									
-			bins add_spec = binsof(aluin1_cov.special1) && binsof(aluin2_cov.special2) && 
-							binsof(opsel_cov) && 
-							binsof(oprtn_cov) intersect {0} &&
-							binsof(en_arith_cov) intersect{1};
-						
+			// bins add_ffs = 	binsof(aluin1_cov.allfs) && binsof(aluin2_cov.allfs) && 
+			// 				binsof(opsel_cov) && 
+			// 				binsof(oprtn_cov) intersect {0} &&
+			// 				binsof(en_arith_cov) intersect{1};
+			// 						
+			// bins add_spec = binsof(aluin1_cov.special1) && binsof(aluin2_cov.special2) && 
+			// 				binsof(opsel_cov) && 
+			// 				binsof(oprtn_cov) intersect {0} &&
+			// 				binsof(en_arith_cov) intersect{1};
+			//
+			ignore_bins add_pos_ignore0 = binsof(aluin1_cov.positive) && binsof(aluin2_cov.positive) && 
+							             binsof(opsel_cov) && 
+							             binsof(oprtn_cov) intersect {1,2,3,4,5,6,7} &&
+							             binsof(carry_cov) &&
+							             binsof(en_arith_cov);
+
+			ignore_bins add_pos_ignore1 = binsof(aluin1_cov.positive) && binsof(aluin2_cov.positive) && 
+							             binsof(opsel_cov) && 
+							             binsof(oprtn_cov) &&
+							             binsof(carry_cov) &&
+							             binsof(en_arith_cov) intersect {0};
+
 			bins add_pos =  binsof(aluin1_cov.positive) && binsof(aluin2_cov.positive) && 
 							binsof(opsel_cov) && 
 							binsof(oprtn_cov) intersect {0} &&
 							binsof(carry_cov) &&
 							binsof(en_arith_cov) intersect{1};
 									
+			ignore_bins add_neg_ignore0 =  binsof(aluin1_cov.negative) && binsof(aluin2_cov.negative) && 
+							              binsof(opsel_cov) && 
+							              binsof(oprtn_cov) intersect {1,2,3,4,5,6,7} &&
+							              binsof(carry_cov) &&
+							              binsof(en_arith_cov);
+
+		    ignore_bins add_neg_ignore1 =  binsof(aluin1_cov.negative) && binsof(aluin2_cov.negative) && 
+							              binsof(opsel_cov) && 
+							              binsof(oprtn_cov) &&
+							              binsof(carry_cov) &&
+							              binsof(en_arith_cov) intersect {0};
 
 			bins add_neg =  binsof(aluin1_cov.negative) && binsof(aluin2_cov.negative) && 
 							binsof(opsel_cov) && 
 							binsof(oprtn_cov) intersect {0} &&
 							binsof(carry_cov) &&
 							binsof(en_arith_cov) intersect{1};
+
+			ignore_bins add_any_ignore0 =  binsof(opsel_cov) && 
+							               binsof(oprtn_cov) intersect {1,2,3,4,5,6,7} &&
+							               binsof(carry_cov) &&
+							               binsof(en_arith_cov);
+			
+			ignore_bins add_any_ignore1 =  binsof(opsel_cov) && 
+							               binsof(oprtn_cov) &&
+							               binsof(carry_cov) &&
+							               binsof(en_arith_cov) intersect {0};
 
 			bins add_any =  binsof(opsel_cov) && 
 							binsof(oprtn_cov) intersect {0} &&
@@ -311,15 +346,15 @@ class Scoreboard;
 
 			sub_cov: cross aluin1_cov, aluin2_cov, opsel_cov, oprtn_cov,carry_cov,en_arith_cov
 		       {
-			bins subffs = 	binsof(aluin1_cov.allfs) && binsof(aluin2_cov.allfs) && 
-							binsof(opsel_cov) && 
-							binsof(oprtn_cov) intersect {2} &&
-							binsof(en_arith_cov) intersect{1};
-									
-			bins subspec =  binsof(aluin1_cov.special1) && binsof(aluin2_cov.special2) && 
-							binsof(opsel_cov) && 
-							binsof(oprtn_cov) intersect {2} &&
-							binsof(en_arith_cov) intersect{1};
+			// bins subffs = 	binsof(aluin1_cov.allfs) && binsof(aluin2_cov.allfs) && 
+			// 				binsof(opsel_cov) && 
+			// 				binsof(oprtn_cov) intersect {2} &&
+			// 				binsof(en_arith_cov) intersect{1};
+			// 						
+			// bins subspec =  binsof(aluin1_cov.special1) && binsof(aluin2_cov.special2) && 
+			// 				binsof(opsel_cov) && 
+			// 				binsof(oprtn_cov) intersect {2} &&
+			// 				binsof(en_arith_cov) intersect{1};
 						
 			bins subpos =  	binsof(aluin1_cov.positive) && binsof(aluin2_cov.positive) && 
 							binsof(opsel_cov) && 
@@ -334,11 +369,45 @@ class Scoreboard;
 							binsof(carry_cov) &&
 							binsof(en_arith_cov) intersect{1};
 
-			bins subany =     	binsof(opsel_cov) && 
+			bins subany =   binsof(opsel_cov) && 
 							binsof(oprtn_cov) intersect {2} &&
 							binsof(carry_cov) &&
 							binsof(en_arith_cov) intersect{1};
 
+			ignore_bins subany_ignore0 =   binsof(opsel_cov) && 
+							               binsof(oprtn_cov) intersect {0,1,3,4,5,6,7} &&
+							               binsof(carry_cov) &&
+							               binsof(en_arith_cov);
+
+			ignore_bins subany_ignore1 =   binsof(opsel_cov) && 
+							               binsof(oprtn_cov) &&
+							               binsof(carry_cov) &&
+							               binsof(en_arith_cov) intersect {0};
+						
+			ignore_bins subpos_ignore0 =  	binsof(aluin1_cov.positive) && binsof(aluin2_cov.positive) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov) intersect {0,1,3,4,5,6,7} &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov);
+
+			ignore_bins subpos_ignore1 =  	binsof(aluin1_cov.positive) && binsof(aluin2_cov.positive) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov) &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov) intersect{0};
+									
+
+			ignore_bins subneg_ignore0 =  	binsof(aluin1_cov.negative) && binsof(aluin2_cov.negative) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov) intersect {0,1,3,4,5,6,7} &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov);
+
+			ignore_bins subneg_ignore1 =  	binsof(aluin1_cov.negative) && binsof(aluin2_cov.negative) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov) &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov) intersect{0};
 		}
 
 
@@ -348,16 +417,16 @@ class Scoreboard;
 
 		hadd_cov: cross h_aluin1_cov, h_aluin2_cov, opsel_cov, oprtn_cov,carry_cov,en_arith_cov
 			{
-				bins hadd_subffs = 	binsof(h_aluin1_cov.allfs) && binsof(h_aluin2_cov.allfs) && 
-							binsof(opsel_cov) && 
-							binsof(oprtn_cov) intersect {1} &&
-							binsof(en_arith_cov) intersect{1};
-									
-				bins hadd_subspec = binsof(h_aluin1_cov.special1) && binsof(h_aluin2_cov.special2) && 
-							binsof(opsel_cov) && 
-							binsof(oprtn_cov) intersect {1} &&
-							binsof(en_arith_cov) intersect{1};
-						
+				// bins hadd_subffs = 	binsof(h_aluin1_cov.allfs) && binsof(h_aluin2_cov.allfs) && 
+				// 			binsof(opsel_cov) && 
+				// 			binsof(oprtn_cov) intersect {1} &&
+				// 			binsof(en_arith_cov) intersect{1};
+				// 					
+				// bins hadd_subspec = binsof(h_aluin1_cov.special1) && binsof(h_aluin2_cov.special2) && 
+				// 			binsof(opsel_cov) && 
+				// 			binsof(oprtn_cov) intersect {1} &&
+				// 			binsof(en_arith_cov) intersect{1};
+				// 		
 				bins hadd_subpos =  binsof(h_aluin1_cov.positive) && binsof(h_aluin2_cov.positive) && 
 							binsof(opsel_cov) && 
 							binsof(oprtn_cov) intersect {1} &&
@@ -375,6 +444,38 @@ class Scoreboard;
 							binsof(oprtn_cov) intersect {1} &&
 							binsof(carry_cov) &&
 							binsof(en_arith_cov) intersect{1};
+
+				ignore_bins hadd_subpos_ignore0 =  binsof(h_aluin1_cov.positive) && binsof(h_aluin2_cov.positive) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov) intersect {0,2,3,4,5,6,7} &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov);
+				ignore_bins hadd_subpos_ignore1 =  binsof(h_aluin1_cov.positive) && binsof(h_aluin2_cov.positive) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov) &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov) intersect{0};
+									
+
+				ignore_bins hadd_subneg_ignore0 =  binsof(h_aluin1_cov.negative) && binsof(h_aluin2_cov.negative) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov) intersect {0,2,3,4,5,6,7} &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov);
+				ignore_bins hadd_subneg_ignore1 =  binsof(h_aluin1_cov.negative) && binsof(h_aluin2_cov.negative) && 
+							binsof(opsel_cov) && 
+							binsof(oprtn_cov)&&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov) intersect{0};
+
+				ignore_bins hadd_subany_ignore0 =  binsof(opsel_cov) && 
+							binsof(oprtn_cov) intersect {0,2,3,4,5,6,7} &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov);
+				ignore_bins hadd_subany_ignore1 =  binsof(opsel_cov) && 
+							binsof(oprtn_cov) &&
+							binsof(carry_cov) &&
+							binsof(en_arith_cov) intersect{0};
 		
 			}
 
@@ -384,26 +485,49 @@ class Scoreboard;
 		//or
 		logic_cov: cross aluin1_cov,aluin2_cov,opsel_cov,oprtn_cov,carry_cov
 		       {
+				ignore_bins ignore0 = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
+							binsof(opsel_cov) && binsof(oprtn_cov) intersect {0,1,2} &&
+							binsof(carry_cov);
+							
 				bins oR = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
 							binsof(opsel_cov) && binsof(oprtn_cov) intersect {5} &&
 							binsof(carry_cov) intersect {0};
+
+				ignore_bins oR_ignore1 = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
+							binsof(opsel_cov) && binsof(oprtn_cov) &&
+							binsof(carry_cov) intersect {1};
 
 
 				bins nOt = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
 							binsof(opsel_cov) && binsof(oprtn_cov) intersect {3} &&
 							binsof(carry_cov) intersect {0};
+			    ignore_bins nOt_ignore1 = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
+							binsof(opsel_cov) && binsof(oprtn_cov) &&
+							binsof(carry_cov) intersect {1};
 
 				bins xOr = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
 							binsof(opsel_cov) && binsof(oprtn_cov) intersect {6} &&
 							binsof(carry_cov) intersect {0};
+				ignore_bins xOr_ignore1 = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
+							binsof(opsel_cov) && binsof(oprtn_cov) &&
+							binsof(carry_cov) intersect {1};
+				
 				
 				bins aNd = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
 							binsof(opsel_cov) && binsof(oprtn_cov) intersect {4} &&
 							binsof(carry_cov) intersect {0};
 
+				ignore_bins aNd_ignore1 = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
+							binsof(opsel_cov) && binsof(oprtn_cov) &&
+							binsof(carry_cov) intersect {1};
+
 				bins lHg = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
 							binsof(opsel_cov) && binsof(oprtn_cov) intersect {7} &&
 							binsof(carry_cov) intersect {0};
+
+				ignore_bins lHg_ignore1 = 	binsof(aluin1_cov) && binsof(aluin2_cov) && 
+							binsof(opsel_cov) && binsof(oprtn_cov) &&
+							binsof(carry_cov) intersect {1};
 			}		
 					
 	endgroup
@@ -415,7 +539,7 @@ class Scoreboard;
         covergroup Shift_Cov; 
 
 		//// ip side enable	
-	       dev_en_cov:coverpoint  pkt_sent.enable;
+	    dev_en_cov:coverpoint  pkt_sent.enable;
 
 		//// Intermediate ips for enable
 		en_shift_cov:coverpoint pkt_cmp.enable_shift;
@@ -435,9 +559,9 @@ class Scoreboard;
 		
 		aluin1_cov: coverpoint pkt_cmp.aluin1 {
 					bins zero = {0};
-					bins allfs = {32'hffffffff};
-					bins special1 = {32'h55555555};
-					bins special2 = {32'haaaaaaaa};
+					// bins allfs = {32'hffffffff};
+					// bins special1 = {32'h55555555};
+					// bins special2 = {32'haaaaaaaa};
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b1);
 //					wildcard bins positive = {32'b0???????????????????????????????};
@@ -452,16 +576,36 @@ class Scoreboard;
 			bins shleftlog_nrml= binsof(aluin1_cov) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {0} &&
 						  binsof(carry_cov) intersect {0};
+
+			ignore_bins shleftlog_nrml_ignore0 = binsof(aluin1_cov) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {1,2,3,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shleftlog_nrml_ignore1 = binsof(aluin1_cov) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
 			
 			// negative bin
 			bins shleftlog_neg= binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {0} &&
 						  binsof(carry_cov) intersect {0};
 
+			ignore_bins shleftlog_neg_ignore0 = binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {1,2,3,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shleftlog_neg_ignore1 = binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
+
 			// positive bin
 			bins shleftlog_pos= binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {0} &&
 						  binsof(carry_cov) intersect {0};
+			ignore_bins shleftlog_pos_ignore0 = binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {1,2,3,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shleftlog_pos_ignore1 = binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
 		}
 
 
@@ -472,15 +616,24 @@ class Scoreboard;
 			bins 	shleftarith_nrml= binsof(aluin1_cov) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {1} &&
 						  binsof(carry_cov) ;
+			ignore_bins shleftarith_nrml_ignore = binsof(aluin1_cov) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,2,3,4,5,6,7} &&
+						  binsof(carry_cov) ;
 			
 			// negative bin
-			bins 	shleftarith_neg= binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+			bins shleftarith_neg= binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {1} &&
+						  binsof(carry_cov) ;
+			ignore_bins shleftarith_neg_ignore = binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,2,3,4,5,6,7} &&
 						  binsof(carry_cov) ;
 
 			// positive bin
-			bins 	shleftarith_pos= binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+			bins shleftarith_pos= binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {1} &&
+						  binsof(carry_cov) ;
+			ignore_bins shleftarith_pos_ignore = binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,2,3,4,5,6,7} &&
 						  binsof(carry_cov) ;
 		}
 
@@ -488,19 +641,37 @@ class Scoreboard;
 		shrghtlog_cov: cross aluin1_cov,oprtn_cov,opsel_cov,carry_cov{
 			
 			// normal bin
-			bins 	shrghtlog_nrml= binsof(aluin1_cov) &&binsof(opsel_cov) &&
+			bins 	shrghtlog_nrml = binsof(aluin1_cov) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {2} &&
 						  binsof(carry_cov) intersect {0};
+			ignore_bins shrghtlog_nrml_ignore0 = binsof(aluin1_cov) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,1,3,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shrghtlog_nrml_ignore1 = binsof(aluin1_cov) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
 			
 			// negative bin
 			bins 	shrghtlog_neg= binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {2} &&
 						  binsof(carry_cov) intersect {0};
+			ignore_bins shrghtlog_neg_ignore0 = binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,1,3,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shrghtlog_neg_ignore1 = binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
 
 			// positive bin
 			bins	shrghtlog_pos= binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {2} &&
 						  binsof(carry_cov) intersect {0};
+			ignore_bins shrghtlog_pos_ignore0 = binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,1,3,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shrghtlog_pos_ignore1 = binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
 		}
 
 
@@ -510,16 +681,35 @@ class Scoreboard;
 			// normal bin
 			bins 	shrghtarith_nrml= binsof(aluin1_cov) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {3} &&
-						  binsof(carry_cov) intersect {0};			
+						  binsof(carry_cov) intersect {0};
+			ignore_bins shrghtarith_nrml_ignore0 = binsof(aluin1_cov) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,1,2,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shrghtarith_nrml_ignore1 = binsof(aluin1_cov) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
 			// negative bin
 			bins shrghtarith_neg= binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {3} &&
 						  binsof(carry_cov) intersect {0};
 
+			ignore_bins shrghtarith_neg_ignore0 = binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,1,2,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shrghtarith_neg_ignore1 = binsof(aluin1_cov.negative) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
+
 			// positive bin
 			bins shrghtarith_pos= binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
 						  binsof(oprtn_cov) intersect {3} &&
 						  binsof(carry_cov) intersect {0};
+			ignore_bins shrghtarith_pos_ignore0 = binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) intersect {0,1,2,4,5,6,7} &&
+						  binsof(carry_cov);
+			ignore_bins shrghtarith_pos_ignore1 = binsof(aluin1_cov.positive) &&binsof(opsel_cov) &&
+						  binsof(oprtn_cov) &&
+						  binsof(carry_cov) intersect {1};
 		}
 
 
@@ -532,8 +722,8 @@ class Scoreboard;
 
 	covergroup Mem_Rd_Cov;
 
-			//// ip side enable	
-	       dev_en_cov:coverpoint  pkt_sent.enable;
+		//// ip side enable	
+	    dev_en_cov:coverpoint  pkt_sent.enable;
 
 		//// check coverage for all possible airthmetic operations 
 		opsel_cov: coverpoint pkt_cmp.opselect{
@@ -549,27 +739,27 @@ class Scoreboard;
 		
 		aluin2_cov: coverpoint pkt_cmp.aluin2 {
 					bins zero = {0};
-					bins allfs = {32'hffffffff};
-					bins special1 = {32'h55555555};
-					bins special2 = {32'haaaaaaaa};
+					// bins allfs = {32'hffffffff};
+					// bins special1 = {32'h55555555};
+					// bins special2 = {32'haaaaaaaa};
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b1);
 		}
 
 		aluin2_7cov: coverpoint pkt_cmp.aluin2 {
 					bins zero = {[0:'1]} iff ((pkt_cmp.aluin2[7:0] == 8'h00));
-					bins allfs = {[0:'1]} iff ((pkt_cmp.aluin2[7:0] == 8'hff));
-					bins special1 = {[0:'1]} iff ((pkt_cmp.aluin2[7:0] == 8'h55));
-				        bins special2 = {[0:'1]} iff ((pkt_cmp.aluin2[7:0] == 8'haa));
+					// bins allfs = {[0:'1]} iff ((pkt_cmp.aluin2[7:0] == 8'hff));
+					// bins special1 = {[0:'1]} iff ((pkt_cmp.aluin2[7:0] == 8'h55));
+				    // bins special2 = {[0:'1]} iff ((pkt_cmp.aluin2[7:0] == 8'haa));
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin2[7] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin2[7] == 1'b1);
 		}		
 
 		aluin2_15cov: coverpoint pkt_cmp.aluin2 {
 					bins zero = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'h0000));
-					bins allfs = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'hffff));
-					bins special1 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'h5555));
-				        bins special2 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'haaaa));
+					// bins allfs = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'hffff));
+					// bins special1 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'h5555));
+				    // bins special2 = {[0:'1]} iff ((pkt_cmp.aluin2[15:0] == 16'haaaa));
 					bins positive = {[0:'1]} iff(pkt_cmp.aluin2[15] == 1'b0);
 					bins negative = {[0:'1]} iff(pkt_cmp.aluin2[15] == 1'b1);
 
@@ -583,31 +773,73 @@ class Scoreboard;
 						           binsof(opsel_cov) &&
 					               binsof(oprtn_cov) intersect {0} &&
 						           binsof(carry_cov) intersect {0};
-					      }
+
+					ignore_bins ld_byte_ignore0 =  binsof(aluin2_7cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) intersect {1,2,3,4,5,6,7} &&
+						           binsof(carry_cov);
+					ignore_bins ld_byte_ignore1 =  binsof(aluin2_7cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) &&
+						           binsof(carry_cov) intersect {1};
+					}
 
 		load_byteu_cov: cross aluin2_7cov,opsel_cov,oprtn_cov,carry_cov{
 					bins ld_byteu= binsof(aluin2_7cov) &&
 						           binsof(opsel_cov) &&
 					               binsof(oprtn_cov) intersect {4} &&
 						           binsof(carry_cov) intersect {0};
+
+					ignore_bins ld_byteu_ignore0 =  binsof(aluin2_7cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) intersect {0,1,2,3,5,6,7} &&
+						           binsof(carry_cov);
+					ignore_bins ld_byteu_ignore1 =  binsof(aluin2_7cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) &&
+						           binsof(carry_cov) intersect {1};
 					      }
 		load_half_cov: cross aluin2_15cov,opsel_cov,oprtn_cov,carry_cov{
 					bins ld_half=  binsof(aluin2_15cov) &&
 						           binsof(opsel_cov) &&
 					               binsof(oprtn_cov) intersect {1} &&
 						           binsof(carry_cov) intersect {0};
+					ignore_bins ld_half_ignore0 =  binsof(aluin2_15cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) intersect {0,2,3,4,5,6,7} &&
+						           binsof(carry_cov);
+					ignore_bins ld_half_ignore1 = binsof(aluin2_15cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) &&
+						           binsof(carry_cov) intersect {1};
 					      }
 		load_halfu_cov: cross aluin2_15cov,opsel_cov,oprtn_cov,carry_cov{
 				    bins ld_halfu= binsof(aluin2_15cov) &&
 						           binsof(opsel_cov) &&
 					               binsof(oprtn_cov) intersect {5} &&
 						           binsof(carry_cov) intersect {0};
+					ignore_bins ld_halfu_ignore0 =  binsof(aluin2_15cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) intersect {0,1,2,3,4,6,7} &&
+						           binsof(carry_cov);
+					ignore_bins ld_halfu_ignore1 = binsof(aluin2_15cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) &&
+						           binsof(carry_cov) intersect {1};
 					      }
 		load_word_cov: cross aluin2_cov,opsel_cov,oprtn_cov,carry_cov{
 				    bins ld_word=  binsof(aluin2_cov) &&
 						           binsof(opsel_cov) &&
 					               binsof(oprtn_cov) intersect {3} &&
 						           binsof(carry_cov) intersect {0};
+					ignore_bins ld_word_ignore0 =  binsof(aluin2_cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) intersect {0,1,2,4,5,6,7} &&
+						           binsof(carry_cov);
+					ignore_bins ld_word_ignore1 = binsof(aluin2_cov) &&
+						           binsof(opsel_cov) &&
+					               binsof(oprtn_cov) &&
+						           binsof(carry_cov) intersect {1};
 					      }
 endgroup
 
@@ -627,10 +859,10 @@ endgroup
 		wr_enable:coverpoint pkt_cmp.mem_write_en;
 
 		wr_data: coverpoint pkt_cmp.mem_data_write_out{
-						bins zero = {0};
-						bins allfs = {32'hffffffff};
-						bins special1 = {32'h55555555};
-						bins special2 = {32'haaaaaaaa};
+						// bins zero = {0};
+						// bins allfs = {32'hffffffff};
+						// bins special1 = {32'h55555555};
+						// bins special2 = {32'haaaaaaaa};
 						bins positive = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b0);
 						bins negative = {[0:'1]} iff(pkt_cmp.aluin1[31] == 1'b1);
 					}	
